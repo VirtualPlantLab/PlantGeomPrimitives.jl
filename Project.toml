@@ -1,0 +1,7 @@
+name = "VPLGeom"
+uuid = "7eef3cc5-4580-4ff0-8f6f-933507db6664"
+authors = ["Alejandro Morales Sierra <alejandro.moralessierra@wur.nl> and contributors"]
+version = "0.0.1"
+
+[compat]
+julia = "1.9"
