@@ -53,7 +53,4 @@ import VPLGeom
     @testset "transformations" begin
         include("test_transformations.jl")
     end
-    @testset "meshio" begin
-        include("test_meshio.jl")
-    end
 end

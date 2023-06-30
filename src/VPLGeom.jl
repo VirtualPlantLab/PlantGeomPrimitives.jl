@@ -8,12 +8,22 @@ import LinearAlgebra: ×, norm, normalize, Diagonal, cross, ⋅
 import CoordinateTransformations:
     SDiagonal, LinearMap, AffineMap, AbstractAffineMap, Translation
 import Rotations: RotX, RotY, RotZ
+import ColorTypes: Colorant
 
 export area,
     areas,
     Mesh,
+    Scene,
+    Material,
     ntriangles,
     nvertices,
+    materials,
+    colors,
+    mesh,
+    nvertices,
+    vertices,
+    normals,
+    faces,
     loadmesh,
     savemesh,
     scale!,
@@ -135,6 +145,9 @@ include("Mesh/Mesh.jl")
 include("Mesh/MeshConstruction.jl")
 include("Mesh/MeshIO.jl")
 include("Mesh/Transformations.jl")
+
+# Scene object
+include("Scene.jl")
 
 # Primitive constructors
 include("Primitives/BBox.jl")
