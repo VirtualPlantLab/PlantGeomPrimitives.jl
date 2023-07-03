@@ -1,6 +1,6 @@
 # VPLGeom
 
-[![CI](https://github.com/VirtualPlantLab/VPLGeom/actions/workflows/main.yml/badge.svg)](https://github.com/VirtualPlantLab/VPLGeom/actions/workflows/main.yml)
+[![CI](https://github.com/VirtualPlantLab/VPLGeom.jl/actions/workflows/main.yml/badge.svg)](https://github.com/VirtualPlantLab/VPLGeom.jl/actions/workflows/main.yml)
 [![Coverage](https://codecov.io/gh/VirtualPlantLab/VPLGeom/branch/master/graph/badge.svg?token=LCZHPERHUN)](https://codecov.io/gh/VirtualPlantLab/VPLGeom)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 [![ColPrac](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
