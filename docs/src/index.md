@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = VPLGeom
+CurrentModule = PlantGeomPrimitives
 ```
 
-# VPLGeom
+# PlantGeomPrimitives
 
-Documentation for [VPLGeom](https://github.com/AleMorales/VPLGeom.jl).
+Documentation for [PlantGeomPrimitives](https://github.com/AleMorales/PlantGeomPrimitives.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [VPLGeom]
+Modules = [PlantGeomPrimitives]
 ```

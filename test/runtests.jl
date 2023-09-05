@@ -1,13 +1,13 @@
 using Test
 import Aqua
-import VPLGeom
+import PlantGeomPrimitives
 
-@testset "VPLGeom.jl" begin
+@testset "PlantGeomPrimitives.jl" begin
 
     # Aqua
     @testset "Aqua" begin
-        Aqua.test_all(VPLGeom, ambiguities = false)
-        Aqua.test_ambiguities([VPLGeom])
+        Aqua.test_all(PlantGeomPrimitives, ambiguities = false)
+        Aqua.test_ambiguities([PlantGeomPrimitives])
     end
 
     # Direct meshing

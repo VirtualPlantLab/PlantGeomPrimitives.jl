@@ -1,13 +1,13 @@
-using VPLGeom
+using PlantGeomPrimitives
 using Documenter
 
-DocMeta.setdocmeta!(VPLGeom, :DocTestSetup, :(using VPLGeom); recursive = true)
+DocMeta.setdocmeta!(PlantGeomPrimitives, :DocTestSetup, :(using PlantGeomPrimitives); recursive = true)
 
 makedocs(;
-    modules = [VPLGeom],
+    modules = [PlantGeomPrimitives],
     authors = "Alejandro Morales Sierra <alejandro.moralessierra@wur.nl> and contributors",
-    repo = "https://github.com/AleMorales/VPLGeom.jl/blob/{commit}{path}#{line}",
-    sitename = "VPLGeom.jl",
+    repo = "https://github.com/AleMorales/PlantGeomPrimitives.jl/blob/{commit}{path}#{line}",
+    sitename = "PlantGeomPrimitives.jl",
     format = Documenter.HTML(;
         prettyurls = get(ENV, "CI", "false") == "true",
         edit_link = "master",

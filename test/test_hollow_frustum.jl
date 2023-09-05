@@ -1,4 +1,4 @@
-import VPLGeom as G
+import PlantGeomPrimitives as G
 using Test
 import CoordinateTransformations: SDiagonal, LinearMap
 

@@ -1,4 +1,4 @@
-module VPLGeom
+module PlantGeomPrimitives
 
 import StaticArrays: SVector, SMatrix
 import GeometryBasics

@@ -1,4 +1,4 @@
-import VPLGeom as G
+import PlantGeomPrimitives as G
 using Test
 
 let
