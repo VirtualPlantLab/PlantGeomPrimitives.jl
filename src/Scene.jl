@@ -107,3 +107,45 @@ function add!(scene; mesh, color = nothing, material = nothing)
     update_material!(scene, material, ntriangles(mesh))
     return nothing
 end
+
+
+# Add material(s) associated to a primitive
+function update_material!(scene, material, nt)
+    if !isnothing(material)
+        matid = length(materials(scene)) + 1
+        # All triangles shared the same material
+        if material isa Material
+            push!(materials(scene), material)
+            for _ in 1:nt
+                push!(material_ids(scene), matid)
+            end
+        # Each triangle has its own material
+        elseif length(material) == nt
+            append!(materials(scene), material)
+            for i in 0:nt-1
+                push!(material_ids(scene), matid + i)
+            end
+        else
+            error("Provided either a material or a vector of materials of length $(nt)")
+        end
+    end
+    return nothing
+end
+
+# Add color(s) associated to a primitive
+function update_color!(scene, color, nvertices)
+    if !isnothing(color)
+        # All vertices share the same color
+        if color isa Colorant
+            for _ in 1:nvertices
+                push!(colors(scene), color)
+            end
+        # Each vertex has its own color
+        elseif length(color) == nvertices
+            append!(colors(scene), color)
+        else
+            error("Provided either a color or a vector of colors of length $(nvertices)")
+        end
+    end
+    return nothing
+end
