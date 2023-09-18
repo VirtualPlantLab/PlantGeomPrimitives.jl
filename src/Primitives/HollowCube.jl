@@ -90,8 +90,8 @@ end
 """
     HollowCube(;length = 1.0, width = 1.0, height = 1.0)
 
-Create a hollow cube with dimensions given by `length`, `width` and `height,  
-standard location and orientation. 
+Create a hollow cube with dimensions given by `length`, `width` and `height`,
+standard location and orientation.
 """
 function HollowCube(; length::FT = 1.0, width::FT = 1.0, height::FT = 1.0) where {FT}
     HollowCube(LinearMap(SDiagonal(height / FT(2), width / FT(2), length)))
