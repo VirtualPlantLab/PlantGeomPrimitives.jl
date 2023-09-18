@@ -1,6 +1,7 @@
 using Documenter, PlantGeomPrimitives
 
 makedocs(;
+         doctest = false,
          modules = [PlantGeomPrimitives],
          format = Documenter.HTML(;
             prettyurls = get(ENV, "CI", "false") == "true",

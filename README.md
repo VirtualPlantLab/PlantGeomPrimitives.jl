@@ -1,11 +1,29 @@
 # PlantGeomPrimitives
 
-[![CI](https://github.com/VirtualPlantLab/PlantGeomPrimitives.jl/actions/workflows/main.yml/badge.svg)](https://github.com/VirtualPlantLab/PlantGeomPrimitives.jl/actions/workflows/main.yml)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://VirtualPlantLab.github.io/PlantGeomPrimitives.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://VirtualPlantLab.github.io/PlantGeomPrimitives.jl/dev/)
+[![CI](https://github.com/VirtualPlantLab/PlantGeomPrimitives.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/VirtualPlantLab/PlantGeomPrimitives.jl/actions/workflows/CI.yml)
 [![Coverage](https://codecov.io/gh/VirtualPlantLab/PlantGeomPrimitives.jl/branch/master/graph/badge.svg?token=LCZHPERHUN)](https://codecov.io/gh/VirtualPlantLab/PlantGeomPrimitives.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 [![ColPrac](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 [![SciML Code Style](https://img.shields.io/static/v1?label=code%20style&message=SciML&color=9558b2&labelColor=389826)](https://github.com/SciML/SciMLStyle)
 
 This package is a component of the VPL ecosystem. It implements algorithms for procedural
-generation of plant geometry from graphs, using turtle graphics. However, users should
-use the [VPL](https://github.com/VirtualPlantLab/VPL) package instead of this one.
+generation of plant geometry from graphs, using turtle graphics. This package is a component
+of the [Virtual Plant Lab](http://virtualplantlab.com/). Users should install instead the
+interface package [VPL.jl](https://github.com/VirtualPlantLab/VPL.jl).
+
+# 1. Instalation
+
+You can install the latest stable version of PlantGraphs.jl with the Julia package manager:
+
+```julia
+] add PlantGeomPrimitives
+```
+
+Or the development version directly from here:
+
+```julia
+import Pkg
+Pkg.add(url="https://github.com/VirtualPlantLab/PlantGeomPrimitives.jl", rev = "master")
+```
