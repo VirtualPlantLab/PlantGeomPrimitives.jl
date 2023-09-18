@@ -124,8 +124,13 @@ eltype(::Type{SolidFrustumVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 """
     SolidFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40)
 
-Create a solid frustum with dimensions given by `length`, `width` and `height`, 
-discretized into `n` triangles and standard location and orientation. 
+Create a solid frustum with dimensions given by `length`, `width` and `height`,
+discretized into `n` triangles and standard location and orientation.
+
+## Examples
+```jldoctest
+julia> SolidFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40);
+```
 """
 function SolidFrustum(;
     length::FT = 1.0,

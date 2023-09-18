@@ -17,6 +17,22 @@ struct Scene{FT}
 end
 
 # Constructor to avoid concrete types for colors and materials
+"""
+    Scene(; mesh = Mesh(Float64), colors = Colorant[], material_ids = Int[], materials = Material[])
+
+Create a `Scene` object from a triangular mesh (`mesh`), a vector of colors (`colors`, any
+type that inherits from `Colorant` from the ColorTypes package), a vector of material IDs
+(`material_ids` that link indivudal triangles to material objects) and a vector of materials
+(`materials`, any object that inherits from `Material`). See packages PlantViz and
+PlantRayTracer for more details on materials and colors.
+
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> s = Scene(mesh = t);
+
+```
+"""
 function Scene(;
     mesh = Mesh(Float64),
     colors = Colorant[],
@@ -116,13 +132,13 @@ function update_material!(scene, material, nt)
         # All triangles shared the same material
         if material isa Material
             push!(materials(scene), material)
-            for _ in 1:nt
+            for _ = 1:nt
                 push!(material_ids(scene), matid)
             end
-        # Each triangle has its own material
+            # Each triangle has its own material
         elseif length(material) == nt
             append!(materials(scene), material)
-            for i in 0:nt-1
+            for i = 0:nt-1
                 push!(material_ids(scene), matid + i)
             end
         else
@@ -137,10 +153,10 @@ function update_color!(scene, color, nvertices)
     if !isnothing(color)
         # All vertices share the same color
         if color isa Colorant
-            for _ in 1:nvertices
+            for _ = 1:nvertices
                 push!(colors(scene), color)
             end
-        # Each vertex has its own color
+            # Each vertex has its own color
         elseif length(color) == nvertices
             append!(colors(scene), color)
         else

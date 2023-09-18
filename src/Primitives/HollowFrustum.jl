@@ -1,6 +1,6 @@
 ### This file contains public API ###
 
-# Note: The compiler was struggling to infer the return type of the iterators, 
+# Note: The compiler was struggling to infer the return type of the iterators,
 # so I annotated them
 
 struct HollowFrustumFaces
@@ -115,8 +115,13 @@ eltype(::Type{HollowFrustumVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 """
     HollowFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40)
 
-Create a hollow frustum with dimensions given by `length`, `width` and `height`, 
-discretized into `n` triangles (must be even) and standard location and orientation. 
+Create a hollow frustum with dimensions given by `length`, `width` and `height`,
+discretized into `n` triangles (must be even) and standard location and orientation.
+
+## Examples
+```jldoctest
+julia> HollowFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40);
+```
 """
 function HollowFrustum(;
     length::FT = 1.0,

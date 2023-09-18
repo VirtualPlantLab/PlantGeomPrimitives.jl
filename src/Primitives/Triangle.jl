@@ -54,10 +54,15 @@ end
 #########################################################
 
 """
-    Triangle(;length = 1.0, width = 1.0
+    Triangle(;length = 1.0, width = 1.0)
 
-Create a triangle with dimensions given by `length` and `width`, standard 
-location and orientation. 
+Create a triangle with dimensions given by `length` and `width`, standard
+location and orientation.
+
+## Examples
+```jldoctest
+julia> Triangle(;length = 1.0, width = 1.0);
+```
 """
 function Triangle(; length::FT = 1.0, width::FT = 1.0) where {FT}
     trans = LinearMap(SDiagonal(one(FT), width / FT(2), length))

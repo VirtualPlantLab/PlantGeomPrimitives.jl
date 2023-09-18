@@ -58,8 +58,13 @@ end
 """
     Rectangle(;length = 1.0, width = 1.0)
 
-Create a rectangle with dimensions given by `length` and width, standard location 
-and orientation. 
+Create a rectangle with dimensions given by `length` and width, standard location
+and orientation.
+
+## Examples
+```jldoctest
+julia> Rectangle(;length = 1.0, width = 1.0);
+```
 """
 function Rectangle(; length::FT = 1.0, width::FT = 1.0) where {FT}
     trans = LinearMap(SDiagonal(one(FT), width / FT(2), length))

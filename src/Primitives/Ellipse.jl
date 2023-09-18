@@ -68,8 +68,13 @@ eltype(::Type{EllipseVertices{FT}}) where {FT} = Vec{FT}
 """
     Ellipse(;length = 1.0, width = 1.0, n = 20)
 
-Create an  ellipse with dimensions given by `length` and `width`, discretized 
-into `n` triangles (must be even) and standard location and orientation. 
+Create an  ellipse with dimensions given by `length` and `width`, discretized
+into `n` triangles (must be even) and standard location and orientation.
+
+## Examples
+```jldoctest
+julia> Ellipse(;length = 1.0, width = 1.0, n = 20);
+```
 """
 function Ellipse(; length::FT = 1.0, width::FT = 1.0, n::Int = 20) where {FT}
     trans = LinearMap(SDiagonal(one(FT), width / FT(2), length / FT(2)))
@@ -96,4 +101,3 @@ function Ellipse!(m::Mesh, trans::AbstractAffineMap; n::Int = 20)
         () -> EllipseFaces(n),
     )
 end
-

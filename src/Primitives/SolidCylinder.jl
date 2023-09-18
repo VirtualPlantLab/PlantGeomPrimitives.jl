@@ -120,8 +120,13 @@ eltype(::Type{SolidCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 """
     SolidCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 80)
 
-Create a solid cylinder with dimensions given by `length`, `width` and `height`, 
-discretized into `n` triangles (must be even) and standard location and orientation. 
+Create a solid cylinder with dimensions given by `length`, `width` and `height`,
+discretized into `n` triangles (must be even) and standard location and orientation.
+
+## Examples
+```jldoctest
+julia> SolidCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 80);
+```
 """
 function SolidCylinder(;
     length::FT = 1.0,

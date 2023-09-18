@@ -71,6 +71,12 @@ abstract type Material end
     Vec(x, y, z)
 
 3D vector or point with coordinates x, y and z.
+
+```jldoctest
+julia> v = Vec(0.0, 0.0, 0.0);
+
+julia> v = Vec(0f0, 0f0, 0f0);
+```
 """
 const Vec{FT} = SVector{3,FT}
 
@@ -81,6 +87,12 @@ const Face = SVector{3,Int}
 
 Returns the origin of the 3D coordinate system as a `Vec` object. By default, the coordinates will be in double
 floating precision (`Float64`) but it is possible to generate a version with lower floating precision as in `O(Float32)`.
+
+```jldoctest
+julia>  O();
+
+julia>  O(Float32);
+```
 """
 function O(::Type{FT} = Float64) where {FT}
     Vec{FT}(0, 0, 0)
@@ -91,6 +103,12 @@ end
 
 Returns an unit vector in the direction of the Z axis as a `Vec` object. By default, the coordinates will be in double
 floating precision (`Float64`) but it is possible to generate a version with lower floating precision as in `Z(Float32)`.
+
+```jldoctest
+julia>  Z();
+
+julia>  Z(Float32);
+```
 """
 function Z(::Type{FT} = Float64) where {FT}
     Vec{FT}(0, 0, 1)
@@ -101,6 +119,12 @@ end
 
 Returns scaled vector in the direction of the Z axis with length `s` as a `Vec` object using the same floating point precision
 as `s`.
+
+```jldoctest
+julia>  Z(1.0);
+
+julia>  Z(1f0);
+```
 """
 function Z(s::FT) where {FT}
     Vec{FT}(0, 0, s)
@@ -111,6 +135,12 @@ end
 
 Returns an unit vector in the direction of the Y axis as a `Vec` object. By default, the coordinates will be in double
 floating precision (`Float64`) but it is possible to generate a version with lower floating precision as in `Y(Float32)`.
+
+```jldoctest
+julia>  Y();
+
+julia>  Y(Float32);
+```
 """
 function Y(::Type{FT} = Float64) where {FT}
     Vec{FT}(0, 1, 0)
@@ -121,6 +151,12 @@ end
 
 Returns scaled vector in the direction of the Y axis with length `s` as a `Vec` object using the same floating point precision
 as `s`.
+
+```jldoctest
+julia>  Y(1.0);
+
+julia>  Y(1f0);
+```
 """
 function Y(s::FT) where {FT}
     Vec{FT}(0, s, 0)
@@ -131,6 +167,12 @@ end
 
 Returns an unit vector in the direction of the X axis as a `Vec` object. By default, the coordinates will be in double
 floating precision (`Float64`) but it is possible to generate a version with lower floating precision as in `X(Float32)`.
+
+```jldoctest
+julia>  X();
+
+julia>  X(Float32);
+```
 """
 function X(::Type{FT} = Float64) where {FT}
     Vec{FT}(1, 0, 0)
@@ -141,6 +183,12 @@ end
 
 Returns scaled vector in the direction of the X axis with length `s` as a `Vec` object using the same floating point precision
 as `s`.
+
+```jldoctest
+julia>  X(1.0);
+
+julia>  X(1f0) ;
+```
 """
 function X(s::FT) where {FT}
     Vec{FT}(s, 0, 0)

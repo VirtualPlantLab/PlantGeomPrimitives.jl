@@ -86,8 +86,13 @@ eltype(::Type{HollowConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 """
     HollowCone(;length = 1.0, width = 1.0, height = 1.0, n = 20)
 
-Create a hollow cone with dimensions given by `length`, `width` and `height`, 
-discretized into `n` triangles (must be even) and standard location and orientation. 
+Create a hollow cone with dimensions given by `length`, `width` and `height`,
+discretized into `n` triangles (must be even) and standard location and orientation.
+
+## Examples
+```jldoctest
+julia> HollowCone(;length = 1.0, width = 1.0, height = 1.0, n = 20);
+```
 """
 function HollowCone(;
     length::FT = 1.0,

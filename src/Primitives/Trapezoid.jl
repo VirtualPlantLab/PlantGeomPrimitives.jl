@@ -58,8 +58,13 @@ end
     Trapezoid(;length = 1.0, width = 1.0, ratio = 1.0)
 
 Create a trapezoid with dimensions given by `length` and the larger `width` and
-the `ratio` between the smaller and larger widths. The trapezoid is generted at 
-the standard location and orientation. 
+the `ratio` between the smaller and larger widths. The trapezoid is generted at
+the standard location and orientation.
+
+## Examples
+```jldoctest
+julia> Trapezoid(;length = 1.0, width = 1.0, ratio = 1.0);
+```
 """
 function Trapezoid(; length::FT = 1.0, width::FT = 1.0, ratio::FT = 1.0) where {FT}
     trans = LinearMap(SDiagonal(one(FT), width / FT(2), length))

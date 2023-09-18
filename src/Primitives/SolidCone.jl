@@ -77,8 +77,13 @@ eltype(::Type{SolidConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 """
     SolidCone(;length = 1.0, width = 1.0, height = 1.0, n = 40)
 
-Create a solid cone with dimensions given by `length`, `width` and `height`, 
-discretized into `n` triangles (must be even) and standard location and orientation. 
+Create a solid cone with dimensions given by `length`, `width` and `height`,
+discretized into `n` triangles (must be even) and standard location and orientation.
+
+## Examples
+```jldoctest
+julia> SolidCone(;length = 1.0, width = 1.0, height = 1.0, n = 40);
+```
 """
 function SolidCone(;
     length::FT = 1.0,

@@ -120,7 +120,12 @@ eltype(::Type{HollowCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
     HollowCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 40)
 
 Create a hollow cylinder with dimensions given by `length`, `width` and `height`,
- discretized into `n` triangles (must be even) and standard location and orientation.
+discretized into `n` triangles (must be even) and standard location and orientation.
+
+## Examples
+```jldoctest
+julia> HollowCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 40);
+```
 """
 function HollowCylinder(;
     length::FT = 1.0,
