@@ -112,6 +112,6 @@ ntriangles(mesh::Mesh)
 nvertices(mesh::Mesh)
 area(m::Mesh)
 areas(m::Mesh)
-loadmesh(filename)
-savemesh(mesh; fileformat = STL_BINARY, filename)
+load_mesh(filename)
+save_mesh(mesh; fileformat = STL_BINARY, filename)
 ```

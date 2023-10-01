@@ -17,14 +17,14 @@ function Mesh(m::GeometryBasics.Mesh)
 end
 
 """
-    loadmesh(filename)
+    load_mesh(filename)
 
 Import a mesh from a file given by `filename`. Supported formats include stl,
 ply, obj and msh. By default, this will generate a `Mesh` object that uses
 double floating-point precision. However, a lower precision can be specified by
-passing the relevant data type as in `loadmesh(filename, Float32)`.
+passing the relevant data type as in `load_mesh(filename, Float32)`.
 """
-function loadmesh(filename, ::Type{FT} = Float64) where {FT}
+function load_mesh(filename, ::Type{FT} = Float64) where {FT}
     check_aply = findfirst(".aply", filename)
     if isnothing(check_aply)
         m = FileIO.load(
@@ -39,7 +39,7 @@ function loadmesh(filename, ::Type{FT} = Float64) where {FT}
 end
 
 """
-    savemesh(mesh; fileformat = STL_BINARY, filename)
+    save_mesh(mesh; fileformat = STL_BINARY, filename)
 
 Save a mesh into an external file using a variety of formats.
 
@@ -56,6 +56,6 @@ not be quoted as strings.
 ## Return
 This function does not return anything, it is executed for its side effect.
 """
-function savemesh(mesh; fileformat = STL_BINARY, filename)
+function save_mesh(mesh; fileformat = STL_BINARY, filename)
     FileIO.save(FileIO.File{FileIO.DataFormat{fileformat}}(filename), GLMesh(mesh))
 end
