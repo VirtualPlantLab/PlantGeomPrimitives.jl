@@ -11,11 +11,11 @@
 This package is a component of the VPL ecosystem. It implements algorithms for procedural
 generation of plant geometry from graphs, using turtle graphics. This package is a component
 of the [Virtual Plant Lab](http://virtualplantlab.com/). Users should install instead the
-interface package [VPL.jl](https://github.com/VirtualPlantLab/VPL.jl).
+interface package [VirtualPlantLab.jl](https://github.com/VirtualPlantLab/VirtualPlantLab.jl).
 
-# 1. Instalation
+# 1. Installation
 
-You can install the latest stable version of PlantGraphs.jl with the Julia package manager:
+You can install the latest stable version of PlantGeomPrimitives.jl with the Julia package manager:
 
 ```julia
 ] add PlantGeomPrimitives
