@@ -1,20 +1,5 @@
 ### This file contains public API ###
 
-struct HollowConeFaces
-    n::Int
-end
-function iterate(c::HollowConeFaces, i::Int = 1)
-    if i < c.n
-        (Face(1, i + 1, i + 2), i + 1)
-    elseif i == c.n
-        (Face(1, c.n + 1, 2), i + 1)
-    else
-        nothing
-    end
-end
-length(c::HollowConeFaces) = c.n
-eltype(::Type{HollowConeFaces}) = Face
-
 
 function normal_cone(α, trans::AbstractMatrix{FT}) where {FT}
     sina = sin(α)
@@ -32,10 +17,7 @@ end
 function HollowConeNormals(n, trans::AbstractMatrix{FT}) where {FT}
     HollowConeNormals(n, FT(2pi / n), trans)
 end
-function iterate(
-    c::HollowConeNormals{FT,TT},
-    i::Int = 1,
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function iterate(c::HollowConeNormals{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i < c.n + 1
         norm = normal_cone((i - 1) * c.Δ + c.Δ / 2, c.trans)
         (norm, i + 1)
@@ -66,20 +48,20 @@ function HollowConeVertices(n, trans)
     FT = eltype(trans.linear)
     HollowConeVertices(n, FT(2pi / n), trans)
 end
-function iterate(
-    c::HollowConeVertices{FT,TT},
-    i::Int = 1,
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
-    if i == 1
-        (c.trans(Vec{FT}(0, 0, 1)), 2)
-    elseif i < c.n + 2
-        vert = vertex_cone((i - 1) * c.Δ, c.trans)
-        (vert, i + 1)
-    else
+function iterate(c::HollowConeVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+    if i > 3c.n
         nothing
+    # Tip of the cone
+    elseif i == 1 || mod(i - 1, 3) == 0
+        (c.trans(Vec{FT}(0, 0, 1)), i + 1)
+    else
+    # Base of the cone
+        p = div(i - 1, 3) + mod(i - 1, 3)
+        vert = vertex_cone(p * c.Δ, c.trans)
+        (vert, i + 1)
     end
 end
-length(c::HollowConeVertices) = c.n + 1
+length(c::HollowConeVertices) = 3c.n
 eltype(::Type{HollowConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
@@ -109,8 +91,7 @@ function HollowCone(trans::AbstractAffineMap; n::Int = 20)
     Primitive(
         trans,
         x -> HollowConeVertices(n, x),
-        x -> HollowConeNormals(n, x),
-        () -> HollowConeFaces(n),
+        x -> HollowConeNormals(n, x)
     )
 end
 
@@ -120,7 +101,6 @@ function HollowCone!(m::Mesh, trans::AbstractAffineMap; n::Int = 20)
         m,
         trans,
         x -> HollowConeVertices(n, x),
-        x -> HollowConeNormals(n, x),
-        () -> HollowConeFaces(n),
+        x -> HollowConeNormals(n, x)
     )
 end

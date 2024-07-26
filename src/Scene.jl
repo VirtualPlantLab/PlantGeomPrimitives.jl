@@ -118,7 +118,7 @@ function add!(scene; mesh, color = nothing, material = nothing)
     append!(normals(scene), normals(mesh))
     append!(faces(scene), (nv .+ face for face in faces(mesh)))
     # Add colors if available
-    update_color!(scene, color, nvertices(mesh))
+    update_color!(scene, color, ntriangles(mesh))
     # Add material if available
     update_material!(scene, material, ntriangles(mesh))
     return nothing
@@ -149,18 +149,18 @@ function update_material!(scene, material, nt)
 end
 
 # Add color(s) associated to a primitive
-function update_color!(scene, color, nvertices)
+function update_color!(scene, color, ntriangles)
     if !isnothing(color)
         # All vertices share the same color
         if color isa Colorant
-            for _ = 1:nvertices
+            for _ = 1:ntriangles
                 push!(colors(scene), color)
             end
             # Each vertex has its own color
-        elseif length(color) == nvertices
+        elseif length(color) == ntriangles
             append!(colors(scene), color)
         else
-            error("Provided either a color or a vector of colors of length $(nvertices)")
+            error("Provided either a color or a vector of colors of length $(ntriangles)")
         end
     end
     return nothing

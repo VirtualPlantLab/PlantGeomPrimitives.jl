@@ -38,7 +38,6 @@ let
     r3 = G.Triangle(scale)
     @test r3.normals == r2.normals
     @test r3.vertices == r2.vertices
-    @test r3.faces == r2.faces
 
     # Create a triangle ussing affine maps and add it to an existing mesh
     function foo2()
@@ -50,7 +49,5 @@ let
     m2 = foo2()
     @test m2.vertices == m.vertices
     @test m2.normals == m.normals
-    @test m2.faces == m.faces
-
 
 end

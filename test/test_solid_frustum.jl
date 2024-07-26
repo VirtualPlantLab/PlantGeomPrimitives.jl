@@ -9,7 +9,7 @@ let
     @test c isa G.Mesh
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2) + pi * (0.5^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.15
-    @test G.nvertices(c) == 22
+    @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
     @test length(c.normals) == 40
 
@@ -18,7 +18,7 @@ let
     @test c isa G.Mesh
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2) + pi * (0.5^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.15f0
-    @test G.nvertices(c) == 22
+    @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
     @test length(c.normals) == 40
 
@@ -40,7 +40,6 @@ let
     c3 = G.SolidFrustum(1 / 10.0, scale, n = 40)
     @test c3.normals == c2.normals
     @test c3.vertices == c2.vertices
-    @test c3.faces == c2.faces
 
     # Create a frustum ussing affine maps and add it to an existing mesh
     function foo2()
@@ -52,6 +51,11 @@ let
     m2 = foo2()
     @test m2.vertices == m.vertices
     @test m2.normals == m.normals
-    @test m2.faces == m.faces
 
 end
+
+# using Makie
+# import GLMakie
+# glm = G.GLMesh(c)
+# mesh(glm, color = :green)
+# wireframe!(glm)

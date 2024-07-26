@@ -6,7 +6,7 @@
 Build a tight axis-aligned bounding box around a `Mesh` object.
 """
 function BBox(m::Mesh{VT}) where {VT<:Vec{FT}} where {FT}
-    @inbounds xmin, ymin, zmin = m.vertices[1]
+    @inbounds xmin, ymin, zmin = vertices(m)[1]
     xmax, ymax, zmax = xmin, ymin, zmin
     for v in m.vertices
         x, y, z = v
@@ -54,23 +54,21 @@ function BBox(pmin::Vec{FT}, pmax::Vec{FT}) where {FT}
     end
 end
 
-# Create the mesh associated to a bbox from the list of vertices
+# Create the mesh associated to a bbox
 function BBox(v1, v2, v3, v4, v5, v6, v7, v8)
-    vertices = [v1, v2, v3, v4, v5, v6, v7, v8]
-    faces = [
-        Face(1, 4, 3),
-        Face(1, 3, 2),
-        Face(1, 5, 8),
-        Face(1, 8, 4),
-        Face(4, 8, 7),
-        Face(4, 7, 3),
-        Face(3, 7, 6),
-        Face(3, 6, 2),
-        Face(2, 6, 5),
-        Face(2, 5, 1),
-        Face(5, 6, 7),
-        Face(5, 7, 8),
-    ]
-    normals = create_normals(vertices, faces)
-    Mesh(vertices, normals, faces)
+    vertices = [
+        v1, v4, v3,
+        v1, v3, v2,
+        v1, v5, v8,
+        v1, v8, v4,
+        v4, v8, v7,
+        v4, v7, v3,
+        v3, v7, v6,
+        v3, v6, v2,
+        v2, v6, v5,
+        v2, v5, v1,
+        v5, v6, v7,
+        v5, v7, v8
+        ]
+    construct_mesh(vertices)
 end

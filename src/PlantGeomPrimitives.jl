@@ -24,7 +24,6 @@ export area,
     nvertices,
     vertices,
     normals,
-    faces,
     load_mesh,
     save_mesh,
     scale!,
@@ -79,7 +78,6 @@ julia> v = Vec(0f0, 0f0, 0f0);
 ```
 """
 const Vec{FT} = SVector{3,FT}
-
 const Face = SVector{3,Int}
 
 """
