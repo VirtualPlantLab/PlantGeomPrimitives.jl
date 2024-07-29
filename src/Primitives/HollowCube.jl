@@ -1,21 +1,21 @@
 ### This file contains public API ###
 
-const all_hollow_cube_faces = (
-    Face(1, 5, 8),
-    Face(1, 8, 4),
-    Face(4, 8, 7),
-    Face(4, 7, 3),
-    Face(3, 7, 6),
-    Face(3, 6, 2),
-    Face(2, 6, 5),
-    Face(2, 5, 1),
-)
-struct HollowCubeFaces end
-iterate(c::HollowCubeFaces) = (@inbounds all_hollow_cube_faces[1], 2)
-iterate(c::HollowCubeFaces, i) =
-    i > 8 ? nothing : (@inbounds all_hollow_cube_faces[i], i + 1)
-length(c::HollowCubeFaces) = 8
-eltype(::Type{HollowCubeFaces}) = Face
+# const all_hollow_cube_faces = (
+#     Face(1, 5, 8),
+#     Face(1, 8, 4),
+#     Face(4, 8, 7),
+#     Face(4, 7, 3),
+#     Face(3, 7, 6),
+#     Face(3, 6, 2),
+#     Face(2, 6, 5),
+#     Face(2, 5, 1),
+# )
+# struct HollowCubeFaces end
+# iterate(c::HollowCubeFaces) = (@inbounds all_hollow_cube_faces[1], 2)
+# iterate(c::HollowCubeFaces, i) =
+#     i > 8 ? nothing : (@inbounds all_hollow_cube_faces[i], i + 1)
+# length(c::HollowCubeFaces) = 8
+# eltype(::Type{HollowCubeFaces}) = Face
 
 
 all_hollow_cube_normals(::Type{FT}) where {FT} = (

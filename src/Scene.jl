@@ -6,11 +6,10 @@
 # nvertices
 # vertices
 # normals
-# faces
 
 # Structure that contains the information gathered by a turtle
-struct Scene{FT}
-    mesh::Mesh{FT}
+struct Scene{VT}
+    mesh::Mesh{VT}
     colors::Vector{Colorant}
     material_ids::Vector{Int}
     materials::Vector{Material}
@@ -33,29 +32,12 @@ julia> s = Scene(mesh = t);
 
 ```
 """
-function Scene(;
-    mesh = Mesh(Float64),
-    colors = Colorant[],
-    material_ids = Int[],
-    materials = Material[],
-)
-    scene = Scene(mesh, Colorant[], Int[], Material[])
-    if colors isa Colorant
-        push!(scene.colors, colors)
-    else
-        append!(scene.colors, colors)
-    end
-    if material_ids isa Number
-        push!(scene.material_ids, material_ids)
-    else
-        append!(scene.material_ids, material_ids)
-    end
-    if materials isa Material
-        push!(scene.materials, materials)
-    else
-        append!(scene.materials, materials)
-    end
-    return scene
+function Scene(;mesh = Mesh(Float64), colors = nothing, materials = nothing)
+    @assert mesh isa Mesh
+    FT = eltype(eltype(vertices(mesh)))
+    sc = Scene(Mesh(FT), Colorant[], Int[], Material[])
+    add!(sc, mesh = mesh, colors = colors, materials = materials)
+    return sc
 end
 
 # Accessor functions
@@ -81,7 +63,6 @@ mesh(scene::Scene) = scene.mesh
 nvertices(scene::Scene) = nvertices(mesh(scene))
 vertices(scene::Scene) = vertices(mesh(scene))
 normals(scene::Scene) = normals(mesh(scene))
-faces(scene::Scene) = faces(mesh(scene))
 
 """
     Scene(scenes)
@@ -111,16 +92,15 @@ end
 Manually add a 3D mesh to an existing `Scene` object (`scene`) with optional
 colors and materials
 """
-function add!(scene; mesh, color = nothing, material = nothing)
+function add!(scene; mesh, colors = nothing, materials = nothing)
     # Add triangles to scene by adjusting face indices
     nv = nvertices(scene)
     append!(vertices(scene), vertices(mesh))
     append!(normals(scene), normals(mesh))
-    append!(faces(scene), (nv .+ face for face in faces(mesh)))
     # Add colors if available
-    update_color!(scene, color, ntriangles(mesh))
+    update_color!(scene, colors, ntriangles(mesh))
     # Add material if available
-    update_material!(scene, material, ntriangles(mesh))
+    update_material!(scene, materials, ntriangles(mesh))
     return nothing
 end
 
@@ -148,17 +128,23 @@ function update_material!(scene, material, nt)
     return nothing
 end
 
-# Add color(s) associated to a primitive
+# Add color(s) associated to a primitive (one color per vertex as required by the renderer)
 function update_color!(scene, color, ntriangles)
     if !isnothing(color)
-        # All vertices share the same color
+        # All triangles share the same color
         if color isa Colorant
             for _ = 1:ntriangles
-                push!(colors(scene), color)
+                for _ = 1:3
+                    push!(colors(scene), color)
+                end
             end
-            # Each vertex has its own color
+        # Each triangle has its own color
         elseif length(color) == ntriangles
-            append!(colors(scene), color)
+            for i = 1:ntriangles
+                for _ = 1:3
+                    push!(colors(scene), color[i])
+                end
+            end
         else
             error("Provided either a color or a vector of colors of length $(ntriangles)")
         end
