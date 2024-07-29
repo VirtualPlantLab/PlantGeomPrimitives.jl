@@ -2,18 +2,16 @@
 
 # Convert to format used in GeometryBasics
 function GLMesh(m::Mesh{VT}) where {VT<:Vec{FT}} where {FT<:AbstractFloat}
-    verts = convert(Vector{GeometryBasics.Point{3,FT}}, m.vertices)
-    facs = convert(Vector{GeometryBasics.TriangleFace{Int}}, m.faces)
+    verts = convert(Vector{GeometryBasics.Point{3,FT}}, vertices(m))
+    facs = [GeometryBasics.TriangleFace{Int}(i, i+1, i+2) for i in 1:3:length(vertices(m))]
     m = GeometryBasics.Mesh(verts, facs)
 end
 
 # Convert from format used in GeometryBasics
 function Mesh(m::GeometryBasics.Mesh)
-    FT = eltype(m[1][1])
-    verts = convert(Vector{SVector{3,FT}}, GeometryBasics.coordinates(m))
-    faces = convert(Vector{SVector{3,Int}}, GeometryBasics.faces(m))
-    norms = [@inbounds normal(verts[face]...) for face in faces]
-    Mesh(verts, norms, faces)
+    v = GeometryBasics.coordinates(m)
+    verts = [Vec(v[f]...) for f in GeometryBasics.faces(m)]
+    construct_mesh(verts)
 end
 
 """

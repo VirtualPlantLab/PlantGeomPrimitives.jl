@@ -8,7 +8,7 @@ let
     c = G.SolidCone(length = 2.0, width = 1.0, height = 1.0, n = 20)
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25^2) * pi / 2 - pi * 0.25) < 0.05
-    @test G.nvertices(c) == 12
+    @test G.nvertices(c) == 60
     @test G.ntriangles(c) == 20
     @test length(c.normals) == 20
 
@@ -16,7 +16,7 @@ let
     c = G.SolidCone(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 20)
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25^2) * pi / 2 - pi * 0.25) < 0.05f0
-    @test G.nvertices(c) == 12
+    @test G.nvertices(c) == 60
     @test G.ntriangles(c) == 20
     @test length(c.normals) == 20
 
@@ -38,7 +38,6 @@ let
     c3 = G.SolidCone(scale, n = 20)
     @test c3.normals == c2.normals
     @test c3.vertices == c2.vertices
-    @test c3.faces == c2.faces
 
     # Create a solid cone ussing affine maps and add it to an existing mesh
     function foo2()
@@ -50,7 +49,11 @@ let
     m2 = foo2()
     @test m2.vertices == m.vertices
     @test m2.normals == m.normals
-    @test m2.faces == m.faces
-
-
 end
+
+
+# using Makie
+# import GLMakie
+# glm = G.GLMesh(c)
+# mesh(glm, color = :green)
+# wireframe!(glm)

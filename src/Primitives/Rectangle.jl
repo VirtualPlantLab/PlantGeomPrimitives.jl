@@ -3,11 +3,6 @@
 #########################################################
 ##################### Iterators #########################
 #########################################################
-struct RectangleFaces end
-iterate(r::RectangleFaces) = (Face(1, 2, 3), 2)
-iterate(r::RectangleFaces, i) = i > 2 ? nothing : (Face(1, 3, 4), 3)
-length(r::RectangleFaces) = 2
-eltype(::Type{RectangleFaces}) = Face
 
 struct RectangleNormals{FT}
     norm::Vec{FT}
@@ -34,18 +29,14 @@ function RectangleVertices(trans)
     FT = eltype(trans.linear)
     RectangleVertices(trans, all_rectangle_vertices(FT))
 end
-function iterate(
-    r::RV,
-)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:RectangleVertices}
-    (@inbounds r.trans(r.verts[1]), 2)
+function iterate(r::RV, i::Int = 1)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:RectangleVertices}
+     i < 4 && return (@inbounds r.trans(r.verts[i]), i + 1)
+     i == 4 && return (@inbounds r.trans(r.verts[1]), i + 1)
+     i == 5 && return (@inbounds r.trans(r.verts[3]), i + 1)
+     i == 6 && return (@inbounds r.trans(r.verts[4]), i + 1)
+     i == 7 && return nothing
 end
-function iterate(
-    r::RV,
-    i,
-)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:RectangleVertices}
-    i > 4 ? nothing : (@inbounds r.trans(r.verts[i]), i + 1)
-end
-length(r::RectangleVertices) = 4
+length(r::RectangleVertices) = 6
 function eltype(::Type{RectangleVertices{VT,TT}}) where {VT,TT}
     @inbounds VT.types[1]
 end
@@ -72,9 +63,7 @@ function Rectangle(; length::FT = 1.0, width::FT = 1.0) where {FT}
 end
 
 # Create a rectangle from affine transformation
-Rectangle(trans::AbstractAffineMap) =
-    Primitive(trans, RectangleVertices, RectangleNormals, RectangleFaces)
+Rectangle(trans::AbstractAffineMap) = Primitive(trans, RectangleVertices, RectangleNormals)
 
 # Create a rectangle from affine transformation and add it in-place to existing mesh
-Rectangle!(m::Mesh, trans::AbstractAffineMap) =
-    Primitive!(m, trans, RectangleVertices, RectangleNormals, RectangleFaces)
+Rectangle!(m::Mesh, trans::AbstractAffineMap) = Primitive!(m, trans, RectangleVertices, RectangleNormals)

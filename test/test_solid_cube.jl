@@ -8,14 +8,14 @@ let
     c = G.SolidCube(length = 1.0, width = 1.0, height = 1.0)
     @test c isa G.Mesh
     @test G.area(c) == 6.0
-    @test G.nvertices(c) == 8
+    @test G.nvertices(c) == 36
     @test G.ntriangles(c) == 12
 
     # Check that it works at lower precision
     c = G.SolidCube(length = 1.0f0, width = 1.0f0, height = 1.0f0)
     @test c isa G.Mesh
     @test G.area(c) == 6.0f0
-    @test G.nvertices(c) == 8
+    @test G.nvertices(c) == 36
     @test G.ntriangles(c) == 12
 
 
@@ -34,9 +34,7 @@ let
     # Create a box using affine maps
     scale = LinearMap(SDiagonal(3.0 / 2, 0.5 / 2, 0.5))
     c3 = G.SolidCube(scale)
-    @test c3.normals == c2.normals
-    @test c3.vertices == c2.vertices
-    @test c3.faces == c2.faces
+    @test c3 ≈ c2
 
     # Create a box ussing affine maps and add it to an existing mesh
     function foo2()
@@ -48,8 +46,6 @@ let
         m
     end
     m2 = foo2()
-    @test m2.vertices == m.vertices
-    @test m2.normals == m.normals
-    @test m2.faces == m.faces
+    @test m2 ≈ m
 
 end

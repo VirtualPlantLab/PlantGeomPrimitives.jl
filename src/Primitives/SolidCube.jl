@@ -1,27 +1,5 @@
 ### This file contains public API ###
 
-const all_solid_cube_faces = (
-    Face(1, 4, 3),
-    Face(1, 3, 2),
-    Face(1, 5, 8),
-    Face(1, 8, 4),
-    Face(4, 8, 7),
-    Face(4, 7, 3),
-    Face(3, 7, 6),
-    Face(3, 6, 2),
-    Face(2, 6, 5),
-    Face(2, 5, 1),
-    Face(5, 6, 7),
-    Face(5, 7, 8),
-)
-struct SolidCubeFaces end
-@inbounds iterate(c::SolidCubeFaces) = (all_solid_cube_faces[1], 2)
-@inbounds iterate(c::SolidCubeFaces, i) =
-    i > 12 ? nothing : (all_solid_cube_faces[i], i + 1)
-length(c::SolidCubeFaces) = 12
-eltype(::Type{SolidCubeFaces}) = Face
-
-
 all_solid_cube_normals(::Type{FT}) where {FT} = (
     Vec{FT}(0, 0, -1),
     Vec{FT}(0, 0, -1),
@@ -61,16 +39,32 @@ function eltype(::Type{SolidCubeNormals{VT,TT}}) where {VT,TT}
 end
 
 
-all_solid_cube_vertices(::Type{FT}) where {FT} = (
-    Vec{FT}(-1, -1, 0),
-    Vec{FT}(-1, 1, 0),
-    Vec{FT}(1, 1, 0),
-    Vec{FT}(1, -1, 0),
-    Vec{FT}(-1, -1, 1),
-    Vec{FT}(-1, 1, 1),
-    Vec{FT}(1, 1, 1),
-    Vec{FT}(1, -1, 1),
-)
+let
+    v1(::Type{FT}) where FT = Vec{FT}(-1, -1, 0)
+    v2(::Type{FT}) where FT = Vec{FT}(-1, 1, 0)
+    v3(::Type{FT}) where FT = Vec{FT}(1, 1, 0)
+    v4(::Type{FT}) where FT = Vec{FT}(1, -1, 0)
+    v5(::Type{FT}) where FT = Vec{FT}(-1, -1, 1)
+    v6(::Type{FT}) where FT = Vec{FT}(-1, 1, 1)
+    v7(::Type{FT}) where FT = Vec{FT}(1, 1, 1)
+    v8(::Type{FT}) where FT = Vec{FT}(1, -1, 1)
+    global all_solid_cube_vertices
+    all_solid_cube_vertices(::Type{FT}) where {FT} = (
+        v1(FT), v4(FT), v3(FT), # 1, 4, 3
+        v1(FT), v3(FT), v2(FT), # 1, 3, 2
+        v1(FT), v5(FT), v8(FT), # 1, 5, 8
+        v1(FT), v8(FT), v4(FT), # 1, 8, 4
+        v4(FT), v8(FT), v7(FT), # 4, 8, 7
+        v4(FT), v7(FT), v3(FT), # 4, 7, 3
+        v3(FT), v7(FT), v6(FT), # 3, 7, 6
+        v3(FT), v6(FT), v2(FT), # 3, 6, 2
+        v2(FT), v6(FT), v5(FT), # 2, 6, 5
+        v2(FT), v5(FT), v1(FT), # 2, 5, 1
+        v5(FT), v6(FT), v7(FT), # 5, 6, 7
+        v5(FT), v7(FT), v8(FT)  # 5, 7, 8
+    )
+end
+
 struct SolidCubeVertices{VT,TT}
     trans::TT
     verts::VT
@@ -79,18 +73,13 @@ function SolidCubeVertices(trans)
     FT = eltype(trans.linear)
     SolidCubeVertices(trans, all_solid_cube_vertices(FT))
 end
-function iterate(
-    c::SCV,
-)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
+function iterate(c::SCV,)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
     (@inbounds c.trans(c.verts[1]), 2)
 end
-function iterate(
-    c::SCV,
-    i,
-)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
-    i > 8 ? nothing : (@inbounds c.trans(c.verts[i]), i + 1)
+function iterate(c::SCV,i,)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
+    i > 36 ? nothing : (@inbounds c.trans(c.verts[i]), i + 1)
 end
-length(c::SolidCubeVertices) = 8
+length(c::SolidCubeVertices) = 36
 function eltype(::Type{SolidCubeVertices{VT,TT}}) where {VT,TT}
     @inbounds VT.types[1]
 end
@@ -114,8 +103,8 @@ end
 
 # Create a solid_cube from affine transformation
 SolidCube(trans::AbstractAffineMap) =
-    Primitive(trans, SolidCubeVertices, SolidCubeNormals, SolidCubeFaces)
+    Primitive(trans, SolidCubeVertices, SolidCubeNormals)
 
 # Create a solid_cube from affine transformation and add it in-place to existing mesh
 SolidCube!(m::Mesh, trans::AbstractAffineMap) =
-    Primitive!(m, trans, SolidCubeVertices, SolidCubeNormals, SolidCubeFaces)
+    Primitive!(m, trans, SolidCubeVertices, SolidCubeNormals)

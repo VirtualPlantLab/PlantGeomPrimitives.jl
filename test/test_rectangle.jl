@@ -8,7 +8,7 @@ let
     r = G.Rectangle(length = 2.0, width = 2.0)
     @test r isa G.Mesh
     @test G.area(r) == 4.0
-    @test G.nvertices(r) == 4
+    @test G.nvertices(r) == 6
     @test G.ntriangles(r) == 2
     @test all(r.normals[1] .== [1.0, 0.0, 0.0])
 
@@ -16,7 +16,7 @@ let
     r = G.Rectangle(length = 2.0f0, width = 2.0f0)
     @test r isa G.Mesh
     @test G.area(r) == 4.0f0
-    @test G.nvertices(r) == 4
+    @test G.nvertices(r) == 6
     @test G.ntriangles(r) == 2
     @test all(r.normals[1] .== [1.0f0, 0.0f0, 0.0f0])
 
@@ -36,9 +36,7 @@ let
     # Create a rectangle using affine maps
     scale = LinearMap(SDiagonal(1.0, 0.1 / 2, 3.0))
     r3 = G.Rectangle(scale)
-    @test r3.normals == r2.normals
-    @test r3.vertices == r2.vertices
-    @test r3.faces == r2.faces
+    @test r3 == r2
 
     # Create a rectangle ussing affine maps and add it to an existing mesh
     function foo2()
@@ -48,8 +46,12 @@ let
         m
     end
     m2 = foo2()
-    @test m2.vertices == m.vertices
-    @test m2.normals == m.normals
-    @test m2.faces == m.faces
+    @test m2 == m
 
 end
+
+# using Makie
+# import GLMakie
+# glm = G.GLMesh(r)
+# mesh(glm, color = :green)
+# wireframe!(glm)

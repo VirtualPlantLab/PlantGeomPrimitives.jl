@@ -3,11 +3,6 @@
 #########################################################
 ##################### Iterators #########################
 #########################################################
-struct TriangleFaces end
-iterate(r::TriangleFaces) = (Face(1, 2, 3), 2)
-iterate(r::TriangleFaces, i) = nothing
-length(r::TriangleFaces) = 1
-eltype(::Type{TriangleFaces}) = Face
 
 struct TriangleNormals{FT}
     norm::Vec{FT}
@@ -37,10 +32,7 @@ end
 function iterate(r::RV)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:TriangleVertices}
     (@inbounds r.trans(r.verts[1]), 2)
 end
-function iterate(
-    r::RV,
-    i,
-)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:TriangleVertices}
+function iterate(r::RV, i)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:TriangleVertices}
     i > 3 ? nothing : (@inbounds r.trans(r.verts[i]), i + 1)
 end
 length(r::TriangleVertices) = 3
@@ -71,8 +63,8 @@ end
 
 # Create a triangle from affine transformation
 Triangle(trans::AbstractAffineMap) =
-    Primitive(trans, TriangleVertices, TriangleNormals, TriangleFaces)
+    Primitive(trans, TriangleVertices, TriangleNormals)
 
 # Create a triangle from affine transformation and add it in-place to existing mesh
 Triangle!(m::Mesh, trans::AbstractAffineMap) =
-    Primitive!(m, trans, TriangleVertices, TriangleNormals, TriangleFaces)
+    Primitive!(m, trans, TriangleVertices, TriangleNormals)

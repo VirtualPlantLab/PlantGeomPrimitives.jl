@@ -8,7 +8,7 @@ let
     c = G.SolidCylinder(length = 2.0, width = 1.0, height = 1.0, n = 40)
     @test c isa G.Mesh
     @test abs(G.area(c) / (2pi + pi / 2) - 1.0) < 0.03
-    @test G.nvertices(c) == 22
+    @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
     @test length(c.normals) == 40
 
@@ -16,7 +16,7 @@ let
     c = G.SolidCylinder(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 40)
     @test c isa G.Mesh
     @test abs(G.area(c) / (2.0f0pi + pi / 2.0f0) - 1.0f0) < 0.03f0
-    @test G.nvertices(c) == 22
+    @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
     @test length(c.normals) == 40
 
@@ -38,7 +38,6 @@ let
     c3 = G.SolidCylinder(scale, n = 40)
     @test c3.normals == c2.normals
     @test c3.vertices == c2.vertices
-    @test c3.faces == c2.faces
 
     # Create a cylinder ussing affine maps and add it to an existing mesh
     function foo2()
@@ -50,6 +49,10 @@ let
     m2 = foo2()
     @test m2.vertices == m.vertices
     @test m2.normals == m.normals
-    @test m2.faces == m.faces
-
 end
+
+# using Makie
+# import GLMakie
+# glm = G.GLMesh(c)
+# mesh(glm, color = :green)
+# wireframe!(glm)

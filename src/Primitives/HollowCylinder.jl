@@ -11,28 +11,6 @@
 #                       Tuple(Face(n + 2, i, i + 1) for i in n + 3:2nt + 1)..., Face(n+2,2nt+2,n+3)] # upper Cylinder
 
 
-struct HollowCylinderFaces
-    n::Int
-end
-function iterate(c::HollowCylinderFaces, i::Int = 1)
-    if i == 1
-        (Face(c.n, c.n + 1, 1), 2) # Lateral - end
-    elseif i == 2
-        (Face(c.n, 2c.n, c.n + 1), 3) # Lateral - end
-    elseif i < c.n + 2
-        j = i - 2
-        (Face(j, j + c.n, j + c.n + 1), i + 1) # Lateral - intermediate
-    elseif i < 2c.n + 1
-        j = i - c.n - 1
-        (Face(j, j + c.n + 1, j + 1), i + 1) # Lateral - intermedaite
-    else
-        nothing
-    end
-end
-length(c::HollowCylinderFaces) = 2c.n
-eltype(::Type{HollowCylinderFaces}) = Face
-
-
 function normal_cylinder(α, trans::AbstractMatrix{FT}) where {FT}
     sina = sin(α)
     cosa = cos(α)
@@ -48,10 +26,7 @@ end
 function HollowCylinderNormals(n, trans::AbstractMatrix{FT}) where {FT}
     HollowCylinderNormals(n, FT(2pi / n), trans)
 end
-function iterate(
-    c::HollowCylinderNormals{FT,TT},
-    i::Int = 1,
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function iterate(c::HollowCylinderNormals{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i == 1
         norm = normal_cylinder((c.n - 1) * c.Δ, c.trans)
         (norm, 2) # Lateral - end
@@ -96,23 +71,24 @@ function HollowCylinderVertices(n, trans)
     FT = eltype(trans.linear)
     HollowCylinderVertices(n, FT(2pi / n), trans)
 end
-function iterate(
-    c::HollowCylinderVertices{FT,TT},
-    i::Int = 1,
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
-    if i < c.n + 1
-        j = i # 2:n
-        vert = vertex_cylinder((j - 1) * c.Δ, c.trans, false)
-        (vert, i + 1) # Lateral - intermediate
-    elseif i < 2c.n + 1
-        j = i - c.n# 2:n
-        vert = vertex_cylinder((j - 1) * c.Δ, c.trans, true)
-        (vert, i + 1) # Lateral - intermediate
+function iterate(c::HollowCylinderVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+    if i < 3*c.n + 1 # Odd triangles
+        j = div(i - 1, 3) + 1 # 3:n
+        v = mod(i - 1 , 3) + 1
+        v == 1 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, false), i + 1)
+        v == 2 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, true), i + 1)
+        v == 3 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, true), i + 1)
+    elseif i < 6c.n + 1 # Even triangles
+        j = div(i - 1, 3) + 1 # n+1:2n
+        v = mod(i - 1 , 3) + 1
+        v == 1 && (return vertex_cylinder((j - c.n - 1) * c.Δ, c.trans, false), i + 1)
+        v == 2 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, true), i + 1)
+        v == 3 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, false), i + 1)
     else
         nothing
     end
 end
-length(c::HollowCylinderVertices) = 2c.n
+length(c::HollowCylinderVertices) = 6c.n
 eltype(::Type{HollowCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
@@ -144,8 +120,7 @@ function HollowCylinder(trans::AbstractAffineMap; n::Int = 40)
     Primitive(
         trans,
         x -> HollowCylinderVertices(n, x),
-        x -> HollowCylinderNormals(n, x),
-        () -> HollowCylinderFaces(n),
+        x -> HollowCylinderNormals(n, x)
     )
 end
 
@@ -157,7 +132,6 @@ function HollowCylinder!(m::Mesh, trans::AbstractAffineMap; n::Int = 40)
         m,
         trans,
         x -> HollowCylinderVertices(n, x),
-        x -> HollowCylinderNormals(n, x),
-        () -> HollowCylinderFaces(n),
+        x -> HollowCylinderNormals(n, x)
     )
 end
