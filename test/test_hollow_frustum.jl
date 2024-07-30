@@ -9,7 +9,7 @@ let
     @test c isa G.Mesh
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.1
-    @test G.nvertices(c) == 20
+    @test G.nvertices(c) == 60
     @test G.ntriangles(c) == 20
     @test length(c.normals) == 20
 
@@ -24,7 +24,7 @@ let
     @test c isa G.Mesh
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.1
-    @test G.nvertices(c) == 20
+    @test G.nvertices(c) == 60
     @test G.ntriangles(c) == 20
     @test length(c.normals) == 20
 
@@ -45,9 +45,7 @@ let
     # Create a hollow frustum using affine maps
     scale = LinearMap(SDiagonal(0.2 / 2, 0.1 / 2, 3.0))
     c3 = G.HollowFrustum(1 / 10, scale, n = 20)
-    @test c3.normals == c2.normals
-    @test c3.vertices == c2.vertices
-    @test c3.faces == c2.faces
+    @test c3 == c2
 
     # Create a frustum ussing affine maps and add it to an existing mesh
     function foo2()
@@ -57,8 +55,6 @@ let
         m
     end
     m2 = foo2()
-    @test m2.vertices == m.vertices
-    @test m2.normals == m.normals
-    @test m2.faces == m.faces
+    @test m2 == m
 
 end

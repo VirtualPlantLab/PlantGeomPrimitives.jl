@@ -4,10 +4,10 @@
 
 # In-place affine transformation of a mesh
 function transform!(m::Mesh, trans::AbstractAffineMap)
-    m.vertices .= trans.(m.vertices)
-    norm_trans = transpose(inv(trans.linear))
-    @simd for i = 1:length(m.normals)
-        @inbounds m.normals[i] = normalize(norm_trans * m.normals[i])
+    vertices(m) .= trans.(vertices(m))
+    norm_trans   = transpose(inv(trans.linear))
+    @simd for i = 1:length(normals(m))
+        @inbounds normals(m)[i] = normalize(norm_trans*normals(m)[i])
     end
     return nothing
 end
@@ -71,6 +71,6 @@ Translate the mesh `m` by vector `v`
 """
 function translate!(m::Mesh, v::Vec)
     trans = Translation(v)
-    m.vertices .= trans.(m.vertices)
+    vertices(m) .= trans.(vertices(m))
     return nothing
 end

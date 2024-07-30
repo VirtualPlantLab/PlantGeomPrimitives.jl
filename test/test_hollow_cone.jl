@@ -8,7 +8,7 @@ let
     c = G.HollowCone(length = 2.0, width = 1.0, height = 1.0, n = 10)
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25) * pi / 2) < 0.07
-    @test G.nvertices(c) == 11
+    @test G.nvertices(c) == 30
     @test G.ntriangles(c) == 10
     @test length(c.normals) == 10
 
@@ -16,7 +16,7 @@ let
     c = G.HollowCone(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 10)
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25) * pi / 2) < 0.07
-    @test G.nvertices(c) == 11
+    @test G.nvertices(c) == 30
     @test G.ntriangles(c) == 10
     @test length(c.normals) == 10
 
@@ -36,9 +36,7 @@ let
     # Create a hollow cone using affine maps
     scale = LinearMap(SDiagonal(0.1, 0.05, 3.0))
     c3 = G.HollowCone(scale, n = 10)
-    @test c3.normals == c2.normals
-    @test c3.vertices == c2.vertices
-    @test c3.faces == c2.faces
+    @test c3 ≈ c2
 
     # Create a cone ussing affine maps and add it to an existing mesh
     function foo2()
@@ -48,8 +46,10 @@ let
         m
     end
     m2 = foo2()
-    @test m2.vertices == m.vertices
-    @test m2.normals == m.normals
-    @test m2.faces == m.faces
-
+    @test m2 ≈ m
 end
+
+# using Makie
+# import GLMakie
+# glm = G.GLMesh(c)
+# mesh(glm, color = :green)

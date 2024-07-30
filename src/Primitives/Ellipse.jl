@@ -1,22 +1,5 @@
 ### This file contains public API ###
 
-struct EllipseFaces
-    nt::Int
-end
-iterate(e::EllipseFaces) = (Face(1, 3, 2), 2)
-function iterate(e::EllipseFaces, i)
-    if i < e.nt
-        (Face(1, i + 2, i + 1), i + 1)
-    elseif i == e.nt
-        (Face(1, 2, e.nt + 1), i + 1)
-    else
-        nothing
-    end
-end
-length(e::EllipseFaces) = e.nt
-eltype(::Type{EllipseFaces}) = Face
-
-
 struct EllipseNormals{FT}
     nt::Int
     norm::Vec{FT}
@@ -41,19 +24,17 @@ function EllipseVertices(nt, trans)
     FT = eltype(trans.linear)
     EllipseVertices(nt, FT(2pi / nt), trans)
 end
-function iterate(
-    e::EllipseVertices{FT,TT},
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function iterate(e::EllipseVertices{FT,TT})::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     (e.trans(Vec{FT}(0, 0, 1)), 2)
 end
-function iterate(
-    e::EllipseVertices{FT,TT},
-    i,
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
-    if i > e.nt + 1
+function iterate(e::EllipseVertices{FT,TT}, i)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+    if i > 3e.nt
         nothing
+    elseif mod(i - 1, 3) == 0
+        (e.trans(Vec{FT}(0, 0, 1)), i + 1)
     else
-        α = (i - 2) * e.Δ
+        p = div(i - 1, 3) + mod(i - 1, 3) - 1
+        α = p * e.Δ
         sina = sin(α)
         cosa = cos(α)
         orig = Z(FT) .+ sina .* Z(FT) .+ cosa .* Y(FT)
@@ -61,7 +42,7 @@ function iterate(
         (vert, i + 1)
     end
 end
-length(e::EllipseVertices) = e.nt + 1
+length(e::EllipseVertices) = 3e.nt
 eltype(::Type{EllipseVertices{FT}}) where {FT} = Vec{FT}
 
 
@@ -86,8 +67,7 @@ function Ellipse(trans::AbstractAffineMap; n::Int = 20)
     Primitive(
         trans,
         x -> EllipseVertices(n, x),
-        x -> EllipseNormals(n, x),
-        () -> EllipseFaces(n),
+        x -> EllipseNormals(n, x)
     )
 end
 
@@ -97,7 +77,6 @@ function Ellipse!(m::Mesh, trans::AbstractAffineMap; n::Int = 20)
         m,
         trans,
         x -> EllipseVertices(n, x),
-        x -> EllipseNormals(n, x),
-        () -> EllipseFaces(n),
+        x -> EllipseNormals(n, x)
     )
 end

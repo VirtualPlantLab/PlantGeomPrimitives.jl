@@ -1,9 +1,9 @@
 ### This file does NOT contains public API ###
 
-# Construction a mesh from a series of vertices and connectivity of the different faces
-function construct_mesh(vertices, faces)
-    norms = [@inbounds normal(vertices[face]...) for face in faces]
-    Mesh(vertices, norms, faces)
+# Construction a mesh from a series of vertices
+function construct_mesh(vertices)
+    norms = [normal(get_triangle(vertices, i)...) for i in 1:length(vertices)/3]
+    Mesh(vertices, norms)
 end
 
 

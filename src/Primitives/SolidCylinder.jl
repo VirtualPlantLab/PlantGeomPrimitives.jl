@@ -1,35 +1,35 @@
 ### This file contains public API ###
 
-struct SolidCylinderFaces
-    n::Int
-end
-function iterate(c::SolidCylinderFaces, i::Int = 1)
-    if i == 1
-        (Face(c.n + 1, c.n + 3, 2), 2) # Lateral - end
-    elseif i == 2
-        (Face(c.n + 1, 2c.n + 2, c.n + 3), 3) # Lateral - end
-    elseif i < c.n + 2
-        j = i - 1
-        (Face(j, j + c.n + 1, j + c.n + 2), i + 1) # Lateral - intermediate
-    elseif i < 2c.n + 1
-        j = i - c.n
-        (Face(j, j + c.n + 2, j + 1), i + 1) # Lateral - intermediate
-    elseif i < 3c.n
-        j = i - 2c.n + 2
-        (Face(1, j - 1, j), i + 1) # Lower base - intermediate
-    elseif i == 3c.n
-        (Face(1, c.n + 1, 2), i + 1) # Lower base - end
-    elseif i < 4c.n
-        j = i - 2c.n + 2
-        (Face(c.n + 2, j + 1, j), i + 1) # Upper base - intermediate
-    elseif i == 4c.n
-        (Face(c.n + 2, c.n + 3, 2c.n + 2), i + 1) # Upper base - end
-    else
-        nothing
-    end
-end
-length(c::SolidCylinderFaces) = 4c.n
-eltype(::Type{SolidCylinderFaces}) = Face
+# struct SolidCylinderFaces
+#     n::Int
+# end
+# function iterate(c::SolidCylinderFaces, i::Int = 1)
+#     if i == 1
+#         (Face(c.n + 1, c.n + 3, 2), 2) # Lateral - end
+#     elseif i == 2
+#         (Face(c.n + 1, 2c.n + 2, c.n + 3), 3) # Lateral - end
+#     elseif i < c.n + 2
+#         j = i - 1
+#         (Face(j, j + c.n + 1, j + c.n + 2), i + 1) # Lateral - intermediate
+#     elseif i < 2c.n + 1
+#         j = i - c.n
+#         (Face(j, j + c.n + 2, j + 1), i + 1) # Lateral - intermediate
+#     elseif i < 3c.n
+#         j = i - 2c.n + 2
+#         (Face(1, j - 1, j), i + 1) # Lower base - intermediate
+#     elseif i == 3c.n
+#         (Face(1, c.n + 1, 2), i + 1) # Lower base - end
+#     elseif i < 4c.n
+#         j = i - 2c.n + 2
+#         (Face(c.n + 2, j + 1, j), i + 1) # Upper base - intermediate
+#     elseif i == 4c.n
+#         (Face(c.n + 2, c.n + 3, 2c.n + 2), i + 1) # Upper base - end
+#     else
+#         nothing
+#     end
+# end
+# length(c::SolidCylinderFaces) = 4c.n
+# eltype(::Type{SolidCylinderFaces}) = Face
 
 
 struct SolidCylinderNormals{FT,TT}
@@ -49,10 +49,7 @@ function SolidCylinderNormals(n, trans::AbstractMatrix{FT}) where {FT}
         trans * Vec{FT}(1, 0, 0),
     )
 end
-function iterate(
-    c::SolidCylinderNormals{FT,TT},
-    i::Int = 1,
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function iterate(c::SolidCylinderNormals{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i == 1
         norm = normal_cylinder((c.n - 1) * c.Δ, c.trans)
         (norm, 2) # Lateral - end
@@ -93,27 +90,38 @@ function SolidCylinderVertices(n, trans)
     FT = eltype(trans.linear)
     SolidCylinderVertices(n, FT(2pi / n), trans)
 end
-function iterate(
-    c::SolidCylinderVertices{FT,TT},
-    i::Int = 1,
-)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
-    if i == 1
-        (c.trans(Vec{FT}(0, 0, 0)), 2) # Center - lower
-    elseif i < c.n + 2
-        j = i # 2:n
-        vert = vertex_cylinder((j - 2) * c.Δ, c.trans, false)
-        (vert, i + 1) # Lateral - intermediate
-    elseif i == c.n + 2
-        (c.trans(Vec{FT}(0, 0, 1)), i + 1) # Center - lower
-    elseif i < 2c.n + 3
-        j = i - c.n - 1# 2:n
-        vert = vertex_cylinder((j - 2) * c.Δ, c.trans, true)
-        (vert, i + 1) # Lateral - intermediate
+function iterate(c::SolidCylinderVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+    if i < 3*c.n + 1 # Odd triangles
+        j = div(i - 1, 3) + 1 # 3:n
+        v = mod(i - 1 , 3) + 1
+        v == 1 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, false), i + 1)
+        v == 2 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, true), i + 1)
+        v == 3 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, true), i + 1)
+    elseif i < 6c.n + 1 # Even triangles
+        j = div(i - 1, 3) + 1 # n+1:2n
+        v = mod(i - 1 , 3) + 1
+        v == 1 && (return vertex_cylinder((j - c.n - 1) * c.Δ, c.trans, false), i + 1)
+        v == 2 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, true), i + 1)
+        v == 3 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, false), i + 1)
+    # Bottom base
+    elseif i < 9c.n + 1
+        j = div(i - 1, 3) + 1 # 3:n
+        v = mod(i - 1 , 3) + 1
+        v == 1 && (return c.trans(Vec{FT}(0, 0, 0)), i + 1)
+        v == 2 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, false), i + 1)
+        v == 3 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, false), i + 1)
+    # Top base
+    elseif i < 12c.n + 1
+        j = div(i - 1, 3) + 1 # 3:n
+        v = mod(i - 1 , 3) + 1
+        v == 1 && (return c.trans(Vec{FT}(0, 0, 1)), i + 1)
+        v == 2 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, true), i + 1)
+        v == 3 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, true), i + 1)
     else
         nothing
     end
 end
-length(c::SolidCylinderVertices) = 2c.n + 2
+length(c::SolidCylinderVertices) = 12c.n
 eltype(::Type{SolidCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
@@ -128,12 +136,7 @@ discretized into `n` triangles (must be even) and standard location and orientat
 julia> SolidCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 80);
 ```
 """
-function SolidCylinder(;
-    length::FT = 1.0,
-    width::FT = 1.0,
-    height::FT = 1.0,
-    n::Int = 80,
-) where {FT}
+function SolidCylinder(;length::FT = 1.0, width::FT = 1.0, height::FT = 1.0, n::Int = 80) where {FT}
     trans = LinearMap(SDiagonal(height / FT(2), width / FT(2), length))
     SolidCylinder(trans, n = n)
 end
@@ -142,23 +145,14 @@ end
 function SolidCylinder(trans::AbstractAffineMap; n::Int = 80)
     @assert iseven(n)
     n = div(n, 4)
-    Primitive(
-        trans,
-        x -> SolidCylinderVertices(n, x),
-        x -> SolidCylinderNormals(n, x),
-        () -> SolidCylinderFaces(n),
-    )
+    Primitive(trans, x -> SolidCylinderVertices(n, x),
+                     x -> SolidCylinderNormals(n, x))
 end
 
 # Create a SolidCylinder from affine transformation and add it in-place to existing mesh
 function SolidCylinder!(m::Mesh, trans::AbstractAffineMap; n::Int = 80)
     @assert iseven(n)
     n = div(n, 4)
-    Primitive!(
-        m,
-        trans,
-        x -> SolidCylinderVertices(n, x),
-        x -> SolidCylinderNormals(n, x),
-        () -> SolidCylinderFaces(n),
-    )
+    Primitive!(m, trans, x -> SolidCylinderVertices(n, x),
+                         x -> SolidCylinderNormals(n, x))
 end

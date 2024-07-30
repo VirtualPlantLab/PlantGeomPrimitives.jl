@@ -61,3 +61,8 @@ end
 @testset "transformations" begin
     include("test_transformations.jl")
 end
+
+# Scenes
+@testset "scenes" begin
+    include("test_scene.jl")
+end

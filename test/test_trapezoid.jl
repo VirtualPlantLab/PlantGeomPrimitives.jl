@@ -8,7 +8,7 @@ let
     r = G.Trapezoid(length = 2.0, width = 2.0, ratio = 0.5)
     @test r isa G.Mesh
     @test G.area(r) == 3.0
-    @test G.nvertices(r) == 4
+    @test G.nvertices(r) == 6
     @test G.ntriangles(r) == 2
     @test all(r.normals[1] .== [1.0, 0.0, 0.0])
 
@@ -16,7 +16,7 @@ let
     r = G.Trapezoid(length = 2.0f0, width = 2.0f0, ratio = 0.5f0)
     @test r isa G.Mesh
     @test G.area(r) == 3.0f0
-    @test G.nvertices(r) == 4
+    @test G.nvertices(r) == 6
     @test G.ntriangles(r) == 2
     @test all(r.normals[1] .== [1.0f0, 0.0f0, 0.0f0])
 
@@ -38,7 +38,6 @@ let
     r3 = G.Trapezoid(scale, 0.5)
     @test r3.normals == r2.normals
     @test r3.vertices == r2.vertices
-    @test r3.faces == r2.faces
 
     # Create a rectangle ussing affine maps and add it to an existing mesh
     function foo2()
@@ -50,6 +49,5 @@ let
     m2 = foo2()
     @test m2.vertices == m.vertices
     @test m2.normals == m.normals
-    @test m2.faces == m.faces
 
 end
