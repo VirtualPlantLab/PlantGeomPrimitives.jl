@@ -2,11 +2,9 @@
 
 
 function normal_cone(α, trans::AbstractMatrix{FT}) where {FT}
-    sina = sin(α)
-    cosa = cos(α)
-    sin45 = sin(FT(pi / 4))
-    orig = sina .* X(FT) .+ cosa .* Y(FT) .+ sin45 .* Z(FT)
-    norm = normalize(trans * orig)
+    x = Vec{FT}(cos(α)/FT(2), sin(α)/FT(2), FT(1)/FT(2))
+    v = x .- O(FT)
+    normalize(trans * v)
 end
 
 struct HollowConeNormals{FT,TT}
@@ -19,7 +17,7 @@ function HollowConeNormals(n, trans::AbstractMatrix{FT}) where {FT}
 end
 function iterate(c::HollowConeNormals{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i < c.n + 1
-        norm = normal_cone((i - 1) * c.Δ + c.Δ / 2, c.trans)
+        norm = normal_cone(i * c.Δ + c.Δ / 2, c.trans)
         (norm, i + 1)
     else
         nothing
@@ -29,12 +27,14 @@ length(c::HollowConeNormals) = c.n
 eltype(::Type{HollowConeNormals{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
-
-function vertex_cone(α, trans)
+# We need to alter order of vertices to make the normals consistent
+function vertex_cone(α, trans, clockwise = true)
     FT = eltype(trans.linear)
-    sina = sin(α)
-    cosa = cos(α)
-    orig = sina .* X(FT) .+ cosa .* Y(FT)
+    if clockwise
+        orig = Vec{FT}(cos(α), sin(α), FT(0))
+    else
+        orig = Vec{FT}(sin(α), cos(α), FT(0))
+    end
     vert = trans(orig)
 end
 
@@ -57,7 +57,7 @@ function iterate(c::HollowConeVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{
     else
     # Base of the cone
         p = div(i - 1, 3) + mod(i - 1, 3)
-        vert = vertex_cone(p * c.Δ, c.trans)
+        vert = vertex_cone(p * c.Δ, c.trans, true)
         (vert, i + 1)
     end
 end
@@ -71,7 +71,13 @@ eltype(::Type{HollowConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 Create a hollow cone with dimensions given by `length`, `width` and `height`,
 discretized into `n` triangles (must be even) and standard location and orientation.
 
-## Examples
+# Arguments
+- `length = 1.0`: The length of the cone (distance between base and apex).
+- `width = 1.0`: The width of the base of the cone.
+- `height = 1.0`: The height of the base of the cone.
+- `n = 20`: The number of triangles to be used in the mesh.
+
+# Examples
 ```jldoctest
 julia> HollowCone(;length = 1.0, width = 1.0, height = 1.0, n = 20);
 ```

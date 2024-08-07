@@ -4,6 +4,16 @@
     BBox(m::Mesh)
 
 Build a tight axis-aligned bounding box around a `Mesh` object.
+
+# Arguments
+- `m`: The mesh to build the bounding box around.
+
+# Examples
+```jldoctest
+julia> m = Rectangle();
+
+julia> box = BBox(m);
+```
 """
 function BBox(m::Mesh{VT}) where {VT<:Vec{FT}} where {FT}
     @inbounds xmin, ymin, zmin = vertices(m)[1]
@@ -30,7 +40,11 @@ end
 Build an axis-aligned bounding box given the vector of minimum (`pmin`) and
 maximum (`pmax`) coordinates.
 
-## Examples
+# Arguments
+- `pmin`: The minimum coordinates of the bounding box.
+- `pmax`: The maximum coordinates of the bounding box.
+
+# Examples
 ```jldoctest
 julia> p0 = Vec(0.0, 0.0, 0.0);
 

@@ -7,7 +7,21 @@
 # vertices
 # normals
 
-# Structure that contains the information gathered by a turtle
+"""
+    Scene
+
+A scene is a collection of triangular meshes, colors, and materials. It is used for rendering
+and ray tracing. The scene object is a container for the following fields:
+
+- `mesh`: A triangular mesh (object of type `PlantGeomPrimitives.Mesh`).
+- `colors`: A vector of colors (any type that inherits from `ColorTypes.Colorant`).
+- `material_ids`: A vector of integers that represent the material associated with each
+triangle in the mesh.
+- `materials`: A vector of materials (object of types that inherit from `PlantGeomPrimitives.Material`).
+
+Several constructors are available to create a scene from scratch or to extend an existing
+scene.
+"""
 struct Scene{VT}
     mesh::Mesh{VT}
     colors::Vector{Colorant}
@@ -17,13 +31,25 @@ end
 
 # Constructor to avoid concrete types for colors and materials
 """
-    Scene(; mesh = Mesh(Float64), colors = Colorant[], material_ids = Int[], materials = Material[])
+    Scene(; mesh = Mesh(Float64), colors = Colorant[], materials = Material[])
 
-Create a `Scene` object from a triangular mesh (`mesh`), a vector of colors (`colors`, any
-type that inherits from `Colorant` from the ColorTypes package), a vector of material IDs
-(`material_ids` that link indivudal triangles to material objects) and a vector of materials
-(`materials`, any object that inherits from `Material`). See packages PlantViz and
-PlantRayTracer for more details on materials and colors.
+Create a scene from a triangular mesh and associated colors and materials. This function
+should only be used when creating a scene from scratch. To extend an existing scene, use
+the function `add!` instead. Also, scenes can be created from `PlantGraphs.Graph` objects
+directly.
+
+# Arguments
+- `mesh`: A triangular mesh (object of type `PlantGeomPrimitives.Mesh`).
+
+- `colors`: A vector of colors (any type that inherits from `ColorTypes.Colorant`). There
+should be one color per triangle in the mesh or a single color (such that all triangles get
+the same color). This is an optional argument, but if no colors are provided, it the
+resulting scene cannot be visualized (the function `rennder()` will throw an error).
+
+- `materials`: A vector of materials (object of type `PlantRayTracer.Material`). There should
+be one material per triangle in the mesh or a single material (such that all triangles get the
+same material). This is an optional argument, but if no materials are provided, the resulting
+scene cannot be used for ray tracing.
 
 ```jldoctest
 julia> t = Triangle(length = 2.0, width = 2.0);
@@ -42,32 +68,193 @@ end
 
 # Accessor functions
 """
-    colors(scene::Scene)
+    colors(scene)
 
-Extract the vector of `Colorant` objects stored inside a scene (used for rendering)
+Extract the vector of colors stored inside a scene (used for rendering). Note that a scene
+will assign one color per vertex (even though we create scenes with one color per triangle
+or per mesh).
+
+# Arguments
+- `scene`: A scene object (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> import ColorTypes: RGB
+
+julia> s = Scene(mesh = t, colors = RGB(1.0, 0.0, 0.0));
+
+julia> colors(s)
+3-element Array{Colorant,1} with eltype ColorTypes.Colorant:
+ RGB{Float64}(1.0,0.0,0.0)
+ RGB{Float64}(1.0,0.0,0.0)
+ RGB{Float64}(1.0,0.0,0.0)
+
+julia> s = Scene(mesh = t);
+
+julia> colors(s)
+ColorTypes.Colorant[]
+```
 """
 colors(scene::Scene) = scene.colors
-"""
-    materials(scene::Scene)
 
-Extract the vector of `Material` objects stored inside a scene (used for ray tracing)
+"""
+    materials(scene)
+
+Extract the vector of material objects stored inside a scene (used for ray tracing).
+Depending on how the scene was created, there may be one material per triangle or one
+material per mesh inside the scene.
+
+# Arguments
+- `scene`: A scene object (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> import PlantRayTracer: Sensor
+
+julia> s = Scene(mesh = t, materials = Sensor(1));
+
+julia> materials(s)
+1-element Vector{Material}:
+ Sensor{1}([0.0])
+
+julia> s = Scene(mesh = t);
+
+julia> materials(s)
+Material[]
+```
 """
 materials(scene::Scene) = scene.materials
-material_ids(scene::Scene) = scene.material_ids
-"""
-    mesh(scene::Scene)
 
-Extract the triangular mesh stored inside a scene (used for ray tracing & rendering)
+material_ids(scene::Scene) = scene.material_ids
+
+"""
+    mesh(scene)
+
+Extract the triangular mesh stored inside a scene (used for ray tracing & rendering).
+
+# Arguments
+- `scene`: A scene object (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> s = Scene(mesh = t);
+
+julia> mesh(s)
+Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -1.0, 0.0], [0.0, 0.0, 2.0], [0.0, 1.0, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0]])
+```
 """
 mesh(scene::Scene) = scene.mesh
+
+"""
+    nvertices(scene)
+
+Calculate the number of vertices
+
+# Arguments
+- `scene`: A scene object (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> s = Scene(mesh = t);
+
+julia> nvertices(s)
+3
+```
+"""
 nvertices(scene::Scene) = nvertices(mesh(scene))
+
+"""
+    ntriangles(scene)
+
+Calculate the number of vertices
+
+# Arguments
+- `scene`: A scene object (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> s = Scene(mesh = t);
+
+julia> ntriangles(s)
+1
+```
+"""
+ntriangles(scene::Scene) = ntriangles(mesh(scene))
+
+"""
+    vertices(scene)
+
+Extract the vertices of the triangular mesh stored inside a scene.
+
+# Arguments
+- `scene`: A scene object (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> s = Scene(mesh = t);
+
+julia> vertices(s)
+3-element Vector{StaticArraysCore.SVector{3, Float64}}:
+ [0.0, -1.0, 0.0]
+ [0.0, 0.0, 2.0]
+ [0.0, 1.0, 0.0]
+```
+"""
 vertices(scene::Scene) = vertices(mesh(scene))
+
+"""
+    normals(scene)
+
+Extract the normals of the triangular mesh stored inside a scene.
+
+# Arguments
+- `scene`: A scene object (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t = Triangle(length = 2.0, width = 2.0);
+
+julia> s = Scene(mesh = t);
+
+julia> normals(s)
+1-element Vector{StaticArraysCore.SVector{3, Float64}}:
+ [1.0, 0.0, 0.0]
+```
+"""
 normals(scene::Scene) = normals(mesh(scene))
 
 """
     Scene(scenes)
 
-Merge multiple `Scene` objects into one.
+Merge multiple scenes into a single one.
+
+# Arguments
+- `scenes`: A vector of scene objects (object of type `Scene`).
+
+# Example
+```jldoctest
+julia> t1 = Triangle(length = 1.0, width = 1.0);
+
+julia> t2 = Rectangle(length = 5.0, width = 0.5);
+
+julia> s1 = Scene(mesh = t1);
+
+julia> s2 = Scene(mesh = t2);
+
+julia> s = Scene([s1, s2]);
+
 """
 function Scene(scenes::Vector{<:Scene})
     allmesh = Mesh(mesh.(scenes))
@@ -87,10 +274,31 @@ end
 
 
 """
-    add!(scene; mesh, color = nothing, material = nothing)
+    add!(scene; mesh, colors = nothing, materials = nothing)
 
-Manually add a 3D mesh to an existing `Scene` object (`scene`) with optional
-colors and materials
+Manually add a mesh to an existing scene with optional colors and materials. Make sure to
+be consistent with the optional arguments. That is, if the scene was created with colors,
+then you should provide colors for the new mesh as well (the same applies to materials).
+Otherwise, the scene will not be usable for rendering or ray tracing.
+
+# Arguments
+- `scene`: A scene object.
+- `mesh`: A triangular mesh.
+- `colors`: A vector of colors. See documentation of `Scene` for more information.
+- `materials`: A vector of materials. See documentation of `Scene` for more information.
+
+# Example
+```jldoctest
+julia> t1 = Triangle(length = 1.0, width = 1.0);
+
+julia> t2 = Rectangle(length = 5.0, width = 0.5);
+
+julia> s1 = Scene(mesh = t1);
+
+julia> add!(s1, mesh = t2);
+
+julia> ntriangles(s1)
+3
 """
 function add!(scene; mesh, colors = nothing, materials = nothing)
     # Add triangles to scene by adjusting face indices
@@ -105,7 +313,8 @@ function add!(scene; mesh, colors = nothing, materials = nothing)
 end
 
 
-# Add material(s) associated to a primitive
+# Add material(s) associated to a primitive, making sure they are consistent with the number
+# of triangles
 function update_material!(scene, material, nt)
     if !isnothing(material)
         matid = length(materials(scene)) + 1

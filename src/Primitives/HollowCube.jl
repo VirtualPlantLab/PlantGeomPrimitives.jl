@@ -1,23 +1,5 @@
 ### This file contains public API ###
 
-# const all_hollow_cube_faces = (
-#     Face(1, 5, 8),
-#     Face(1, 8, 4),
-#     Face(4, 8, 7),
-#     Face(4, 7, 3),
-#     Face(3, 7, 6),
-#     Face(3, 6, 2),
-#     Face(2, 6, 5),
-#     Face(2, 5, 1),
-# )
-# struct HollowCubeFaces end
-# iterate(c::HollowCubeFaces) = (@inbounds all_hollow_cube_faces[1], 2)
-# iterate(c::HollowCubeFaces, i) =
-#     i > 8 ? nothing : (@inbounds all_hollow_cube_faces[i], i + 1)
-# length(c::HollowCubeFaces) = 8
-# eltype(::Type{HollowCubeFaces}) = Face
-
-
 all_hollow_cube_normals(::Type{FT}) where {FT} = (
     Vec{FT}(0, -1, 0),
     Vec{FT}(0, -1, 0),
@@ -97,12 +79,18 @@ end
 """
     HollowCube(;length = 1.0, width = 1.0, height = 1.0)
 
-Create a hollow cube with dimensions given by `length`, `width` and `height`,
+Create a hollow cube (a prism) with dimensions given by `length`, `width` and `height`,
 standard location and orientation.
+
+# Arguments
+- `length = 1.0`: The length of the cube.
+- `width = 1.0`: The width of the base of the cube.
+- `height = 1.0`: The height of the base of the cube.
 
 ## Examples
 ```jldoctest
-julia> HollowCube(;length = 1.0, width = 1.0, height = 1.0);
+julia> HollowCube(;length = 1.0, width = 1.0, height = 1.0)
+Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[-0.5, -0.5, 0.0], [-0.5, -0.5, 1.0], [0.5, -0.5, 1.0], [-0.5, -0.5, 0.0], [0.5, -0.5, 1.0], [0.5, -0.5, 0.0], [0.5, -0.5, 0.0], [0.5, -0.5, 1.0], [0.5, 0.5, 1.0], [0.5, -0.5, 0.0]  …  [-0.5, 0.5, 1.0], [0.5, 0.5, 0.0], [-0.5, 0.5, 1.0], [-0.5, 0.5, 0.0], [-0.5, 0.5, 0.0], [-0.5, 0.5, 1.0], [-0.5, -0.5, 1.0], [-0.5, 0.5, 0.0], [-0.5, -0.5, 1.0], [-0.5, -0.5, 0.0]], StaticArraysCore.SVector{3, Float64}[[0.0, -1.0, 0.0], [0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0], [-1.0, 0.0, 0.0]])
 ```
 """
 function HollowCube(; length::FT = 1.0, width::FT = 1.0, height::FT = 1.0) where {FT}

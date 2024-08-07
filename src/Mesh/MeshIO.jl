@@ -15,12 +15,25 @@ function Mesh(m::GeometryBasics.Mesh)
 end
 
 """
-    load_mesh(filename)
+    load_mesh(filename, type = Float64)
 
 Import a mesh from a file given by `filename`. Supported formats include stl,
 ply, obj and msh. By default, this will generate a `Mesh` object that uses
 double floating-point precision. However, a lower precision can be specified by
 passing the relevant data type as in `load_mesh(filename, Float32)`.
+
+# Arguments
+- `filename`: The path to the file containing the mesh.
+- `type`: The floating-point precision type for the mesh data (default is `Float64`).
+
+# Example
+```julia
+julia> mesh = load_mesh("path/to/mesh.obj")
+Mesh{StaticArraysCore.SVector{3, Float64}}
+
+julia> mesh = load_mesh("path/to/mesh.obj", Float32)
+Mesh{StaticArraysCore.SVector{3, Float32}}
+```
 """
 function load_mesh(filename, ::Type{FT} = Float64) where {FT}
     check_aply = findfirst(".aply", filename)
@@ -37,23 +50,28 @@ function load_mesh(filename, ::Type{FT} = Float64) where {FT}
 end
 
 """
-    save_mesh(mesh; fileformat = STL_BINARY, filename)
+    save_mesh(mesh; fileformat = :STL_BINARY, filename)
 
 Save a mesh into an external file using a variety of formats.
 
-## Arguments
+# Arguments
 - `mesh`: Object of type `Mesh`.
-- `fileformat`: Format to store the mesh. This is a keyword argument.
-- `filename`: Name of the file in which to store the mesh.
+- `fileformat`: Format to store the mesh as symbol.
+- `filename`: Name of the file in which to store the mesh as string.
 
-## Details
-The `fileformat` should take one of the following arguments: `STL_BINARY`,
-`STL_ASCII`, `PLY_BINARY`, `PLY_ASCII` or `OBJ`. Note that these names should
-not be quoted as strings.
+# Details
+The `fileformat` should take one of the following arguments: `:STL_BINARY`,
+`:STL_ASCII`, `:PLY_BINARY`, `:PLY_ASCII` or `:OBJ`. Note that these names should
+be passed as symnols.
 
-## Return
-This function does not return anything, it is executed for its side effect.
+# Example
+```julia
+v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)]
+n = [Vec(0.0, 0.0, 1.0)]
+mesh = Mesh(v, n)
+save_mesh(mesh, fileformat = :STL_BINARY, filename = "path/to/mesh.bstl")
+```
 """
-function save_mesh(mesh; fileformat = STL_BINARY, filename)
+function save_mesh(mesh; fileformat = :STL_BINARY, filename)
     FileIO.save(FileIO.File{FileIO.DataFormat{fileformat}}(filename), GLMesh(mesh))
 end

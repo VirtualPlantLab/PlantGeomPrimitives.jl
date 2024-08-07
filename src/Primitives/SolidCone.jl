@@ -11,7 +11,7 @@ function SolidConeNormals(n, trans::AbstractMatrix{FT}) where {FT}
 end
 function iterate(c::SolidConeNormals{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i < c.n + 1
-        norm = normal_cone((i - 1) * c.Δ + c.Δ / 2, c.trans)
+        norm = normal_cone(i * c.Δ + c.Δ / 2, c.trans)
         (norm, i + 1)
     elseif i < 2c.n + 1
         (c.normbase, i + 1)
@@ -21,7 +21,6 @@ function iterate(c::SolidConeNormals{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Ve
 end
 length(c::SolidConeNormals) = 2c.n
 eltype(::Type{SolidConeNormals{FT,TT}}) where {FT,TT} = Vec{FT}
-
 
 struct SolidConeVertices{FT,TT}
     n::Int
@@ -45,8 +44,9 @@ function iterate(c::SolidConeVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Ve
         end
     # Edges of base of the cone
     else
+        clockwise = i < 3c.n ? true : false
         p = div(i - 1, 3) + mod(i - 1, 3)
-        vert = vertex_cone(p * c.Δ, c.trans)
+        vert = vertex_cone(p * c.Δ, c.trans, clockwise)
         (vert, i + 1)
     end
 end
@@ -60,7 +60,13 @@ eltype(::Type{SolidConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 Create a solid cone with dimensions given by `length`, `width` and `height`,
 discretized into `n` triangles (must be even) and standard location and orientation.
 
-## Examples
+# Arguments
+- `length = 1.0`: The length of the cone (distance between base and apex).
+- `width = 1.0`: The width of the base of the cone.
+- `height = 1.0`: The height of the base of the cone.
+- `n = 40`: The number of triangles to be used in the mesh.
+
+# Examples
 ```jldoctest
 julia> SolidCone(;length = 1.0, width = 1.0, height = 1.0, n = 40);
 ```

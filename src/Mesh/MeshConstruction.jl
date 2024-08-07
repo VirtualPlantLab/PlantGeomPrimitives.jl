@@ -8,8 +8,9 @@ end
 
 
 # Compute the normal of a triangle given three vertices
+# This defines implicitly our orientation convention
 function normal(v1, v2, v3)
     e1 = v2 .- v1
     e2 = v3 .- v1
-    normalize(e2 × e1)
+    normalize(e1 × e2)
 end

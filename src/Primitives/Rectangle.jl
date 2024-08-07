@@ -52,9 +52,14 @@ end
 Create a rectangle with dimensions given by `length` and width, standard location
 and orientation.
 
-## Examples
+# Arguments
+- `length = 1.0`: The length of the rectangle.
+- `width = 1.0`: The width of the rectangle.
+
+# Examples
 ```jldoctest
-julia> Rectangle(;length = 1.0, width = 1.0);
+julia> Rectangle(;length = 1.0, width = 1.0)
+Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -0.5, 0.0], [0.0, -0.5, 1.0], [0.0, 0.5, 1.0], [0.0, -0.5, 0.0], [0.0, 0.5, 1.0], [0.0, 0.5, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
 ```
 """
 function Rectangle(; length::FT = 1.0, width::FT = 1.0) where {FT}

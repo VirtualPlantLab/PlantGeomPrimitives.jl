@@ -1,37 +1,5 @@
 ### This file contains public API ###
 
-# struct SolidCylinderFaces
-#     n::Int
-# end
-# function iterate(c::SolidCylinderFaces, i::Int = 1)
-#     if i == 1
-#         (Face(c.n + 1, c.n + 3, 2), 2) # Lateral - end
-#     elseif i == 2
-#         (Face(c.n + 1, 2c.n + 2, c.n + 3), 3) # Lateral - end
-#     elseif i < c.n + 2
-#         j = i - 1
-#         (Face(j, j + c.n + 1, j + c.n + 2), i + 1) # Lateral - intermediate
-#     elseif i < 2c.n + 1
-#         j = i - c.n
-#         (Face(j, j + c.n + 2, j + 1), i + 1) # Lateral - intermediate
-#     elseif i < 3c.n
-#         j = i - 2c.n + 2
-#         (Face(1, j - 1, j), i + 1) # Lower base - intermediate
-#     elseif i == 3c.n
-#         (Face(1, c.n + 1, 2), i + 1) # Lower base - end
-#     elseif i < 4c.n
-#         j = i - 2c.n + 2
-#         (Face(c.n + 2, j + 1, j), i + 1) # Upper base - intermediate
-#     elseif i == 4c.n
-#         (Face(c.n + 2, c.n + 3, 2c.n + 2), i + 1) # Upper base - end
-#     else
-#         nothing
-#     end
-# end
-# length(c::SolidCylinderFaces) = 4c.n
-# eltype(::Type{SolidCylinderFaces}) = Face
-
-
 struct SolidCylinderNormals{FT,TT}
     n::Int
     Δ::FT
@@ -131,7 +99,13 @@ eltype(::Type{SolidCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 Create a solid cylinder with dimensions given by `length`, `width` and `height`,
 discretized into `n` triangles (must be even) and standard location and orientation.
 
-## Examples
+# Arguments
+- `length = 1.0`: The length of the cylinder (distance between bases).
+- `width = 1.0`: The width of the base of the cylinder.
+- `height = 1.0`: The height of the base of the cylinder.
+- `n = 80`: The number of triangles to discretize the cylinder into.
+
+# Examples
 ```jldoctest
 julia> SolidCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 80);
 ```

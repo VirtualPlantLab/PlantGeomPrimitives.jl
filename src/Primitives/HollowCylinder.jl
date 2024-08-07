@@ -1,16 +1,5 @@
 ### This file contains public API ###
 
-# cylinder_faces_hollow(n) = Face[Tuple(Face(i, i + n + 1, i + n + 2) for i in 2:n)...,
-#                                  Tuple(Face(i, i + n + 2, i + 1) for i in 2:n)...,
-#                                  Face(n+1, 2nt+2, n+3), Face(n+1,n+3,1)]
-
-# cylinder_faces(n) = [Tuple(Face(i, i + n + 1, i + n + 2) for i in 2:n)...,
-#                       Tuple(Face(i, i + n + 2, i + 1) for i in 2:n)...,
-#                       Face(n+1, 2nt+2, n+3), Face(n+1,n+3,1) # sides
-#                       Tuple(Face(1, i, i - 1) for i in n+1:-1:3)..., Face(1,2,n+1), # lower Cylinder
-#                       Tuple(Face(n + 2, i, i + 1) for i in n + 3:2nt + 1)..., Face(n+2,2nt+2,n+3)] # upper Cylinder
-
-
 function normal_cylinder(α, trans::AbstractMatrix{FT}) where {FT}
     sina = sin(α)
     cosa = cos(α)
@@ -98,7 +87,13 @@ eltype(::Type{HollowCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 Create a hollow cylinder with dimensions given by `length`, `width` and `height`,
 discretized into `n` triangles (must be even) and standard location and orientation.
 
-## Examples
+# Arguments
+- `length = 1.0`: The length of the cylinder (distance between bases).
+- `width = 1.0`: The width of the base of the cylinder.
+- `height = 1.0`: The height of the base of the cylinder.
+- `n = 40`: The number of triangles to discretize the cylinder into.
+
+# Examples
 ```jldoctest
 julia> HollowCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 40);
 ```

@@ -62,7 +62,8 @@ export area,
     HollowCone!,
     SolidCone!,
     HollowFrustum!,
-    SolidFrustum!
+    SolidFrustum!,
+    get_triangle
 
 abstract type Material end
 

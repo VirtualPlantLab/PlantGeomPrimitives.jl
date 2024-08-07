@@ -49,12 +49,18 @@ eltype(::Type{EllipseVertices{FT}}) where {FT} = Vec{FT}
 """
     Ellipse(;length = 1.0, width = 1.0, n = 20)
 
-Create an  ellipse with dimensions given by `length` and `width`, discretized
-into `n` triangles (must be even) and standard location and orientation.
+Create a triangular mesh approximating an ellipse with dimensions given by `length` and
+`width`, discretized into `n` triangles (must be even) and standard location and orientation.
 
-## Examples
+# Arguments
+- `length = 1.0`: The length of the ellipse.
+- `width = 1.0`: The width of the ellipse.
+- `n = 20`: The number of triangles to be used in the mesh.
+
+# Examples
 ```jldoctest
-julia> Ellipse(;length = 1.0, width = 1.0, n = 20);
+julia> Ellipse(;length = 1.0, width = 1.0, n = 20)
+Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, 0.0, 0.5], [0.0, 0.5, 0.5], [0.0, 0.47552825814757677, 0.6545084971874737], [0.0, 0.0, 0.5], [0.0, 0.47552825814757677, 0.6545084971874737], [0.0, 0.4045084971874737, 0.7938926261462366], [0.0, 0.0, 0.5], [0.0, 0.4045084971874737, 0.7938926261462366], [0.0, 0.29389262614623657, 0.9045084971874737], [0.0, 0.0, 0.5]  …  [0.0, 0.29389262614623646, 0.09549150281252622], [0.0, 0.0, 0.5], [0.0, 0.29389262614623646, 0.09549150281252622], [0.0, 0.40450849718747367, 0.20610737385376332], [0.0, 0.0, 0.5], [0.0, 0.40450849718747367, 0.20610737385376332], [0.0, 0.47552825814757677, 0.34549150281252616], [0.0, 0.0, 0.5], [0.0, 0.47552825814757677, 0.34549150281252616], [0.0, 0.5, 0.4999999999999999]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
 ```
 """
 function Ellipse(; length::FT = 1.0, width::FT = 1.0, n::Int = 20) where {FT}
