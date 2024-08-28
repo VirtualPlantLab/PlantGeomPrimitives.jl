@@ -10,7 +10,6 @@ let
     @test abs(G.area(c) - sqrt(4 + 0.25) * pi / 2) < 0.07
     @test G.nvertices(c) == 30
     @test G.ntriangles(c) == 10
-    @test length(c.normals) == 10
 
     # Check that it works for different floating point precisions
     c = G.HollowCone(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 10)
@@ -18,7 +17,6 @@ let
     @test abs(G.area(c) - sqrt(4 + 0.25) * pi / 2) < 0.07
     @test G.nvertices(c) == 30
     @test G.ntriangles(c) == 10
-    @test length(c.normals) == 10
 
     # Merging two meshes
     c = G.HollowCone(length = 2.0, width = 1.0, height = 1.0, n = 10)
@@ -49,7 +47,7 @@ let
     @test m2 ≈ m
 end
 
-# using Makie
 # import GLMakie
-# glm = G.GLMesh(c)
-# mesh(glm, color = :green)
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

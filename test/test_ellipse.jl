@@ -10,7 +10,6 @@ let
     @test abs(G.area(e) / pi - 1.0) < 0.13
     @test G.nvertices(e) == 30
     @test G.ntriangles(e) == 10
-    @test all(e.normals[1] .== [1.0, 0.0, 0.0])
 
     # Check a different precision works
     e = G.Ellipse(length = 2.0f0, width = 2.0f0, n = 10)
@@ -47,7 +46,7 @@ let
 
 end
 
-# using Makie
 # import GLMakie
-# glm = G.GLMesh(e)
-# mesh(glm, color = :green)
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

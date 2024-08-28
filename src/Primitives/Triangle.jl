@@ -4,23 +4,8 @@
 ##################### Iterators #########################
 #########################################################
 
-struct TriangleNormals{FT}
-    norm::Vec{FT}
-end
-TriangleNormals(trans::AbstractMatrix{FT}) where {FT} =
-    TriangleNormals(normalize(trans * X(FT)))
-function iterate(r::TriangleNormals{FT})::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT}
-    (r.norm, 2)
-end
-function iterate(r::TriangleNormals{FT}, i)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT}
-    nothing
-end
-length(r::TriangleNormals) = 1
-eltype(::Type{TriangleNormals{FT}}) where {FT} = Vec{FT}
-
-
 all_triangle_vertices(::Type{FT}) where {FT} =
-    (Vec{FT}(0, -1, 0), Vec{FT}(0, 0, 1), Vec{FT}(0, 1, 0))
+    (Vec{FT}(0, -1, 0), Vec{FT}(0, 1, 0), Vec{FT}(0, 0, 1))
 struct TriangleVertices{VT,TT}
     trans::TT
     verts::VT
@@ -67,8 +52,8 @@ end
 
 # Create a triangle from affine transformation
 Triangle(trans::AbstractAffineMap) =
-    Primitive(trans, TriangleVertices, TriangleNormals)
+    Primitive(trans, TriangleVertices)
 
 # Create a triangle from affine transformation and add it in-place to existing mesh
 Triangle!(m::Mesh, trans::AbstractAffineMap) =
-    Primitive!(m, trans, TriangleVertices, TriangleNormals)
+    Primitive!(m, trans, TriangleVertices)

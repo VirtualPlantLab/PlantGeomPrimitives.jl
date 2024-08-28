@@ -49,7 +49,7 @@ let
 
 end
 
-# using Makie
 # import GLMakie
-# glm = G.GLMesh(c)
-# mesh(glm, color = :green)
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

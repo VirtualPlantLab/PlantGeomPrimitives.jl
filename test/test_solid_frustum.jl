@@ -11,7 +11,6 @@ let
     @test abs(G.area(c) - exact_area) < 0.15
     @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
-    @test length(c.normals) == 40
 
     # Check that it works at lower precision
     c = G.SolidFrustum(length = 2.0f0, width = 1.0f0, height = 1.0f0, ratio = 0.5f0, n = 40)
@@ -20,7 +19,6 @@ let
     @test abs(G.area(c) - exact_area) < 0.15f0
     @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
-    @test length(c.normals) == 40
 
     # Merging two meshes
     c = G.SolidFrustum(length = 2.0, width = 1.0, height = 1.0, ratio = 0.5, n = 40)
@@ -54,8 +52,7 @@ let
 
 end
 
-# using Makie
 # import GLMakie
-# glm = G.GLMesh(c)
-# mesh(glm, color = :green)
-# wireframe!(glm)
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

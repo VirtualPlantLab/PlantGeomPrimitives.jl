@@ -1,27 +1,5 @@
 ### This file contains public API ###
 
-struct SolidConeNormals{FT,TT}
-    n::Int
-    Δ::FT
-    trans::TT
-    normbase::Vec{FT}
-end
-function SolidConeNormals(n, trans::AbstractMatrix{FT}) where {FT}
-    SolidConeNormals(n, FT(2pi / n), trans, normalize(trans * Vec{FT}(0, 0, -1)))
-end
-function iterate(c::SolidConeNormals{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
-    if i < c.n + 1
-        norm = normal_cone(i * c.Δ + c.Δ / 2, c.trans)
-        (norm, i + 1)
-    elseif i < 2c.n + 1
-        (c.normbase, i + 1)
-    else
-        nothing
-    end
-end
-length(c::SolidConeNormals) = 2c.n
-eltype(::Type{SolidConeNormals{FT,TT}}) where {FT,TT} = Vec{FT}
-
 struct SolidConeVertices{FT,TT}
     n::Int
     Δ::FT
@@ -44,7 +22,7 @@ function iterate(c::SolidConeVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Ve
         end
     # Edges of base of the cone
     else
-        clockwise = i < 3c.n ? true : false
+        clockwise = i <= 3c.n ? true : false
         p = div(i - 1, 3) + mod(i - 1, 3)
         vert = vertex_cone(p * c.Δ, c.trans, clockwise)
         (vert, i + 1)
@@ -83,14 +61,14 @@ end
 
 # Create a SolidCone from affine transformation
 function SolidCone(trans::AbstractAffineMap; n::Int = 40)
-    @assert iseven(n)
+    @assert mod(n, 4) == 0 && iseven(div(n, 4)) "n must be an even multiple of 4"
     n = div(n, 2)
-    Primitive(trans, x -> SolidConeVertices(n, x), x -> SolidConeNormals(n, x))
+    Primitive(trans, x -> SolidConeVertices(n, x))
 end
 
 # Create a SolidCone from affine transformation and add it in-place to existing mesh
 function SolidCone!(m::Mesh, trans::AbstractAffineMap; n::Int = 40)
-    @assert iseven(n)
+    @assert mod(n, 4) == 0 "n must be a multiple of 4"
     n = div(n, 2)
-    Primitive!(m, trans, x -> SolidConeVertices(n, x), x -> SolidConeNormals(n, x))
+    Primitive!(m, trans, x -> SolidConeVertices(n, x))
 end

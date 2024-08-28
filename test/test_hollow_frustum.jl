@@ -11,7 +11,6 @@ let
     @test abs(G.area(c) - exact_area) < 0.1
     @test G.nvertices(c) == 60
     @test G.ntriangles(c) == 20
-    @test length(c.normals) == 20
 
     # Check that it works at lower precision
     c = G.HollowFrustum(
@@ -26,7 +25,6 @@ let
     @test abs(G.area(c) - exact_area) < 0.1
     @test G.nvertices(c) == 60
     @test G.ntriangles(c) == 20
-    @test length(c.normals) == 20
 
     # Mergin two meshes
     c = G.HollowFrustum(length = 2.0, width = 1.0, height = 1.0, ratio = 0.5, n = 20)
@@ -58,3 +56,8 @@ let
     @test m2 == m
 
 end
+
+# import GLMakie
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

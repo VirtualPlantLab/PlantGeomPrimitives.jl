@@ -1,54 +1,5 @@
 ### This file contains public API ###
 
-struct SolidCylinderNormals{FT,TT}
-    n::Int
-    Δ::FT
-    trans::TT
-    ln::Vec{FT}
-    un::Vec{FT}
-end
-
-function SolidCylinderNormals(n, trans::AbstractMatrix{FT}) where {FT}
-    SolidCylinderNormals(
-        n,
-        FT(2pi / n),
-        trans,
-        trans * Vec{FT}(0, 0, -1),
-        trans * Vec{FT}(1, 0, 0),
-    )
-end
-function iterate(c::SolidCylinderNormals{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
-    if i == 1
-        norm = normal_cylinder((c.n - 1) * c.Δ, c.trans)
-        (norm, 2) # Lateral - end
-    elseif i == 2
-        norm = normal_cylinder((c.n - 1) * c.Δ, c.trans)
-        (norm, 3) # Lateral - end
-    elseif i < c.n + 2
-        j = i - 1 # 2:n
-        norm = normal_cylinder((j - 2) * c.Δ, c.trans)
-        (norm, i + 1) # Lateral - intermediate
-    elseif i < 2c.n + 1
-        j = i - c.n # 2:n
-        norm = normal_cylinder((j - 2) * c.Δ, c.trans)
-        (norm, i + 1) # Lateral - intermediate
-    elseif i < 3c.n
-        (c.ln, i + 1) # Lower base - intermediate
-    elseif i == 3c.n
-        (c.ln, i + 1) # Lower base - end
-    elseif i < 4c.n
-        j = i - 2c.n + 2
-        (c.un, i + 1) # Upper base - intermediate
-    elseif i == 4c.n
-        (c.un, i + 1) # Upper base - end
-    else
-        nothing
-    end
-end
-length(c::SolidCylinderNormals) = 4c.n
-eltype(::Type{SolidCylinderNormals{FT,TT}}) where {FT,TT} = Vec{FT}
-
-
 struct SolidCylinderVertices{FT,TT}
     n::Int
     Δ::FT
@@ -63,21 +14,21 @@ function iterate(c::SolidCylinderVertices{FT,TT},i::Int = 1)::Union{Nothing,Tupl
         j = div(i - 1, 3) + 1 # 3:n
         v = mod(i - 1 , 3) + 1
         v == 1 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, false), i + 1)
-        v == 2 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, true), i + 1)
-        v == 3 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, true), i + 1)
+        v == 2 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, true), i + 1)
+        v == 3 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, true), i + 1)
     elseif i < 6c.n + 1 # Even triangles
         j = div(i - 1, 3) + 1 # n+1:2n
         v = mod(i - 1 , 3) + 1
         v == 1 && (return vertex_cylinder((j - c.n - 1) * c.Δ, c.trans, false), i + 1)
-        v == 2 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, true), i + 1)
-        v == 3 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, false), i + 1)
+        v == 2 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, false), i + 1)
+        v == 3 && (return vertex_cylinder((j - c.n) * c.Δ, c.trans, true), i + 1)
     # Bottom base
     elseif i < 9c.n + 1
         j = div(i - 1, 3) + 1 # 3:n
         v = mod(i - 1 , 3) + 1
         v == 1 && (return c.trans(Vec{FT}(0, 0, 0)), i + 1)
-        v == 2 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, false), i + 1)
-        v == 3 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, false), i + 1)
+        v == 2 && (return vertex_cylinder((j - 1) * c.Δ, c.trans, false), i + 1)
+        v == 3 && (return vertex_cylinder((j - 2) * c.Δ, c.trans, false), i + 1)
     # Top base
     elseif i < 12c.n + 1
         j = div(i - 1, 3) + 1 # 3:n
@@ -119,14 +70,12 @@ end
 function SolidCylinder(trans::AbstractAffineMap; n::Int = 80)
     @assert iseven(n)
     n = div(n, 4)
-    Primitive(trans, x -> SolidCylinderVertices(n, x),
-                     x -> SolidCylinderNormals(n, x))
+    Primitive(trans, x -> SolidCylinderVertices(n, x))
 end
 
 # Create a SolidCylinder from affine transformation and add it in-place to existing mesh
 function SolidCylinder!(m::Mesh, trans::AbstractAffineMap; n::Int = 80)
     @assert iseven(n)
     n = div(n, 4)
-    Primitive!(m, trans, x -> SolidCylinderVertices(n, x),
-                         x -> SolidCylinderNormals(n, x))
+    Primitive!(m, trans, x -> SolidCylinderVertices(n, x))
 end

@@ -3,23 +3,9 @@
 #########################################################
 ##################### Iterators #########################
 #########################################################
-struct TrapezoidNormals{FT}
-    norm::Vec{FT}
-end
-TrapezoidNormals(trans::AbstractMatrix{FT}) where {FT} =
-    TrapezoidNormals(normalize(trans * X(FT)))
-function iterate(r::TrapezoidNormals{FT})::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT}
-    (r.norm, 2)
-end
-function iterate(r::TrapezoidNormals{FT}, i)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT}
-    i > 2 ? nothing : (r.norm, 3)
-end
-length(r::TrapezoidNormals) = 2
-eltype(::Type{TrapezoidNormals{FT}}) where {FT} = Vec{FT}
-
 
 all_trapezoid_vertices(ratio::FT) where {FT} =
-    (Vec{FT}(0, -1, 0), Vec{FT}(0, -ratio, 1), Vec{FT}(0, ratio, 1), Vec{FT}(0, 1, 0))
+    (Vec{FT}(0, ratio, 1), Vec{FT}(0, -ratio, 1), Vec{FT}(0, -1, 0), Vec{FT}(0, 1, 0))
 struct TrapezoidVertices{TT, VT}
     trans::TT
     verts::VT
@@ -68,9 +54,9 @@ end
 
 # Create a trapezoid from affine transformation
 Trapezoid(trans::AbstractAffineMap, ratio) =
-    Primitive(trans, x -> genTrapezoidVertices(x, ratio), TrapezoidNormals)
+    Primitive(trans, x -> genTrapezoidVertices(x, ratio))
 
 # Create a trapezoid from affine transformation and add it in-place to existing mesh
 function Trapezoid!(m::Mesh, trans::AbstractAffineMap, ratio)
-    Primitive!(m, trans, x -> genTrapezoidVertices(x, ratio), TrapezoidNormals)
+    Primitive!(m, trans, x -> genTrapezoidVertices(x, ratio))
 end

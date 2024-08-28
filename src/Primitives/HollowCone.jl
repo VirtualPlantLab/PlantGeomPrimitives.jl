@@ -1,32 +1,5 @@
 ### This file contains public API ###
 
-
-function normal_cone(α, trans::AbstractMatrix{FT}) where {FT}
-    x = Vec{FT}(cos(α)/FT(2), sin(α)/FT(2), FT(1)/FT(2))
-    v = x .- O(FT)
-    normalize(trans * v)
-end
-
-struct HollowConeNormals{FT,TT}
-    n::Int
-    Δ::FT
-    trans::TT
-end
-function HollowConeNormals(n, trans::AbstractMatrix{FT}) where {FT}
-    HollowConeNormals(n, FT(2pi / n), trans)
-end
-function iterate(c::HollowConeNormals{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
-    if i < c.n + 1
-        norm = normal_cone(i * c.Δ + c.Δ / 2, c.trans)
-        (norm, i + 1)
-    else
-        nothing
-    end
-end
-length(c::HollowConeNormals) = c.n
-eltype(::Type{HollowConeNormals{FT,TT}}) where {FT,TT} = Vec{FT}
-
-
 # We need to alter order of vertices to make the normals consistent
 function vertex_cone(α, trans, clockwise = true)
     FT = eltype(trans.linear)
@@ -94,19 +67,10 @@ end
 
 # Create a HollowCone from affine transformation
 function HollowCone(trans::AbstractAffineMap; n::Int = 20)
-    Primitive(
-        trans,
-        x -> HollowConeVertices(n, x),
-        x -> HollowConeNormals(n, x)
-    )
+    Primitive(trans, x -> HollowConeVertices(n, x))
 end
 
 # Create a HollowCone from affine transformation and add it in-place to existing mesh
 function HollowCone!(m::Mesh, trans::AbstractAffineMap; n::Int = 20)
-    Primitive!(
-        m,
-        trans,
-        x -> HollowConeVertices(n, x),
-        x -> HollowConeNormals(n, x)
-    )
+    Primitive!(m, trans, x -> HollowConeVertices(n, x))
 end

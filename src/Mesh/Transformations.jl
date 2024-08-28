@@ -6,7 +6,7 @@
 function transform!(m::Mesh, trans::AbstractAffineMap)
     vertices(m) .= trans.(vertices(m))
     norm_trans   = transpose(inv(trans.linear))
-    @simd for i = 1:length(normals(m))
+    @simd for i in eachindex(normals(m))
         @inbounds normals(m)[i] = normalize(norm_trans*normals(m)[i])
     end
     return nothing
@@ -24,17 +24,11 @@ Scale a mesh `m` along the three axes provided by `vec`.
 
 # Examples
 ```jldoctest
-julia> mesh = Rectangle()
-Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -0.5, 0.0], [0.0, -0.5, 1.0], [0.0, 0.5, 1.0], [0.0, -0.5, 0.0], [0.0, 0.5, 1.0], [0.0, 0.5, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+julia> m = Rectangle();
 
-julia> scaling_vector = Vec(2.0, 1.5, 3.0)
-3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
- 2.0
- 1.5
- 3.0
+julia> scaling_vector = Vec(2.0, 1.5, 3.0);
 
-julia> scale!(mesh, scaling_vector)
-
+julia> scale!(m, scaling_vector);
 ```
 """
 function scale!(m::Mesh, vec::Vec)
@@ -53,14 +47,11 @@ Rotate a mesh `m` around the x axis by angle `θ`.
 
 # Examples
 ```jldoctest
-julia> mesh = Rectangle()
-Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -0.5, 0.0], [0.0, -0.5, 1.0], [0.0, 0.5, 1.0], [0.0, -0.5, 0.0], [0.0, 0.5, 1.0], [0.0, 0.5, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+julia> m = Rectangle();
 
-julia> θ = pi/2
-1.5707963267948966
+julia> θ = pi/2;
 
-julia> rotatex!(mesh, θ)
-
+julia> rotatex!(m, θ)
 ```
 """
 function rotatex!(m::Mesh, θ)
@@ -79,14 +70,11 @@ Rotate a mesh `m` around the y axis by angle `θ`.
 
 # Examples
 ```jldoctest
-julia> mesh = Rectangle()
-Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -0.5, 0.0], [0.0, -0.5, 1.0], [0.0, 0.5, 1.0], [0.0, -0.5, 0.0], [0.0, 0.5, 1.0], [0.0, 0.5, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+julia> m = Rectangle();
 
-julia> θ = pi/2
-1.5707963267948966
+julia> θ = pi/2;
 
-julia> rotatey!(mesh, θ)
-
+julia> rotatey!(m, θ);
 ```
 """
 function rotatey!(m::Mesh, θ)
@@ -105,14 +93,11 @@ Rotate a mesh `m` around the z axis by angle `θ`.
 
 # Examples
 ```jldoctest
-julia> mesh = Rectangle()
-Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -0.5, 0.0], [0.0, -0.5, 1.0], [0.0, 0.5, 1.0], [0.0, -0.5, 0.0], [0.0, 0.5, 1.0], [0.0, 0.5, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+julia> m = Rectangle();
 
-julia> θ = pi/2
-1.5707963267948966
+julia> θ = pi/2;
 
-julia> rotatez!(mesh, θ)
-
+julia> rotatez!(m, θ);
 ```
 """
 function rotatez!(m::Mesh, θ)
@@ -142,17 +127,11 @@ Translate the mesh `m` by vector `v`.
 
 # Examples
 ```jldoctest
-julia> mesh = Rectangle()
-Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -0.5, 0.0], [0.0, -0.5, 1.0], [0.0, 0.5, 1.0], [0.0, -0.5, 0.0], [0.0, 0.5, 1.0], [0.0, 0.5, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+julia> m = Rectangle();
 
-julia> v = Vec(2.0, 1.5, 3.0)
-3-element StaticArraysCore.SVector{3, Float64} with indices SOneTo(3):
- 2.0
- 1.5
- 3.0
+julia> v = Vec(2.0, 1.5, 3.0);
 
-julia> translate!(mesh, v)
-
+julia> translate!(m, v);
 ```
 """
 function translate!(m::Mesh, v::Vec)

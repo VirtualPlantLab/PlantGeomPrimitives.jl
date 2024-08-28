@@ -1,44 +1,5 @@
 ### This file contains public API ###
 
-all_solid_cube_normals(::Type{FT}) where {FT} = (
-    Vec{FT}(0, 0, -1),
-    Vec{FT}(0, 0, -1),
-    Vec{FT}(0, -1, 0),
-    Vec{FT}(0, -1, 0),
-    Vec{FT}(1, 0, 0),
-    Vec{FT}(1, 0, 0),
-    Vec{FT}(0, 1, 0),
-    Vec{FT}(0, 1, 0),
-    Vec{FT}(-1, 0, 0),
-    Vec{FT}(-1, 0, 0),
-    Vec{FT}(0, 0, 1),
-    Vec{FT}(0, 0, 1),
-)
-struct SolidCubeNormals{VT,TT}
-    trans::TT
-    normals::VT
-end
-function SolidCubeNormals(trans)
-    FT = eltype(trans)
-    SolidCubeNormals(trans, all_solid_cube_normals(FT))
-end
-function iterate(
-    c::SCN,
-)::Union{Nothing,Tuple{eltype(SCN),Int64}} where {SCN<:SolidCubeNormals}
-    (@inbounds normalize(c.trans * c.normals[1]), 2)
-end
-function iterate(
-    c::SCN,
-    i,
-)::Union{Nothing,Tuple{eltype(SCN),Int64}} where {SCN<:SolidCubeNormals}
-    i > 12 ? nothing : (@inbounds normalize(c.trans * c.normals[i]), i + 1)
-end
-length(c::SolidCubeNormals) = 12
-function eltype(::Type{SolidCubeNormals{VT,TT}}) where {VT,TT}
-    @inbounds VT.types[1]
-end
-
-
 let
     v1(::Type{FT}) where FT = Vec{FT}(-1, -1, 0)
     v2(::Type{FT}) where FT = Vec{FT}(-1, 1, 0)
@@ -50,18 +11,18 @@ let
     v8(::Type{FT}) where FT = Vec{FT}(1, -1, 1)
     global all_solid_cube_vertices
     all_solid_cube_vertices(::Type{FT}) where {FT} = (
-        v1(FT), v4(FT), v3(FT), # 1, 4, 3
-        v1(FT), v3(FT), v2(FT), # 1, 3, 2
-        v1(FT), v5(FT), v8(FT), # 1, 5, 8
-        v1(FT), v8(FT), v4(FT), # 1, 8, 4
-        v4(FT), v8(FT), v7(FT), # 4, 8, 7
-        v4(FT), v7(FT), v3(FT), # 4, 7, 3
-        v3(FT), v7(FT), v6(FT), # 3, 7, 6
-        v3(FT), v6(FT), v2(FT), # 3, 6, 2
-        v2(FT), v6(FT), v5(FT), # 2, 6, 5
-        v2(FT), v5(FT), v1(FT), # 2, 5, 1
-        v5(FT), v6(FT), v7(FT), # 5, 6, 7
-        v5(FT), v7(FT), v8(FT)  # 5, 7, 8
+        v1(FT), v3(FT), v4(FT), # 1, 3, 4
+        v1(FT), v2(FT), v3(FT), # 1, 2, 3
+        v1(FT), v8(FT), v5(FT), # 1, 8, 5
+        v1(FT), v4(FT), v8(FT), # 1, 4, 8
+        v4(FT), v7(FT), v8(FT), # 4, 7, 8
+        v4(FT), v3(FT), v7(FT), # 4, 3, 7
+        v3(FT), v6(FT), v7(FT), # 3, 6, 7
+        v3(FT), v2(FT), v6(FT), # 3, 2, 6
+        v2(FT), v5(FT), v6(FT), # 2, 5, 6
+        v2(FT), v1(FT), v5(FT), # 2, 1, 5
+        v5(FT), v7(FT), v6(FT), # 5, 7, 6
+        v5(FT), v8(FT), v7(FT)  # 5, 8, 7
     )
 end
 
@@ -107,9 +68,7 @@ function SolidCube(; length::FT = 1.0, width::FT = 1.0, height::FT = 1.0) where 
 end
 
 # Create a solid_cube from affine transformation
-SolidCube(trans::AbstractAffineMap) =
-    Primitive(trans, SolidCubeVertices, SolidCubeNormals)
+SolidCube(trans::AbstractAffineMap) = Primitive(trans, SolidCubeVertices)
 
 # Create a solid_cube from affine transformation and add it in-place to existing mesh
-SolidCube!(m::Mesh, trans::AbstractAffineMap) =
-    Primitive!(m, trans, SolidCubeVertices, SolidCubeNormals)
+SolidCube!(m::Mesh, trans::AbstractAffineMap) = Primitive!(m, trans, SolidCubeVertices)

@@ -49,3 +49,8 @@ let
     @test m2 ≈ m
 
 end
+
+# import GLMakie
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

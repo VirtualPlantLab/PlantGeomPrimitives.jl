@@ -10,7 +10,6 @@ let
     @test G.area(r) == 3.0
     @test G.nvertices(r) == 6
     @test G.ntriangles(r) == 2
-    @test all(r.normals[1] .== [1.0, 0.0, 0.0])
 
     # Check that it works with lower precision
     r = G.Trapezoid(length = 2.0f0, width = 2.0f0, ratio = 0.5f0)
@@ -18,7 +17,6 @@ let
     @test G.area(r) == 3.0f0
     @test G.nvertices(r) == 6
     @test G.ntriangles(r) == 2
-    @test all(r.normals[1] .== [1.0f0, 0.0f0, 0.0f0])
 
     # Merging two meshes
     r = G.Trapezoid(length = 2.0, width = 2.0, ratio = 0.5)
@@ -51,3 +49,8 @@ let
     @test m2.normals == m.normals
 
 end
+
+# import GLMakie
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

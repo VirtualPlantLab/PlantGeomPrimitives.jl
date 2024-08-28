@@ -26,12 +26,12 @@ let
     G.rotatey!(m3, 45.0)
     @test all(
         (getindex.(m3.vertices, 1) .!== getindex.(m.vertices, 1)) .==
-        [false, true, true, false, true, false],
+        [true, true, false, true, false, false],
     )
     @test all(getindex.(m3.vertices, 2) .≈ getindex.(m.vertices, 2))
     @test all(
         (getindex.(m3.vertices, 3) .!== getindex.(m.vertices, 3)) .==
-        [false, true, true, false, true, false],
+        [true, true, false, true, false, false],
     )
     @test all(m3.normals .!== m.normals)
     G.rotatey!(m3, -45.0)

@@ -10,7 +10,6 @@ let
     @test G.area(r) == 2
     @test G.nvertices(r) == 3
     @test G.ntriangles(r) == 1
-    @test all(r.normals[1] .== [1.0, 0.0, 0.0])
 
     # Check that it works with lower precision
     r = G.Triangle(length = 2.0f0, width = 2.0f0)
@@ -18,7 +17,6 @@ let
     @test G.area(r) == 2.0f0
     @test G.nvertices(r) == 3
     @test G.ntriangles(r) == 1
-    @test all(r.normals[1] .== [1.0f0, 0.0f0, 0.0f0])
 
     # Merging two meshes
     r = G.Triangle(length = 2.0, width = 2.0)
@@ -51,3 +49,8 @@ let
     @test m2.normals == m.normals
 
 end
+
+# import GLMakie
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

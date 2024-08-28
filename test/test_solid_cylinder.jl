@@ -10,7 +10,6 @@ let
     @test abs(G.area(c) / (2pi + pi / 2) - 1.0) < 0.03
     @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
-    @test length(c.normals) == 40
 
     # Checking that it works at lower precisions
     c = G.SolidCylinder(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 40)
@@ -18,7 +17,6 @@ let
     @test abs(G.area(c) / (2.0f0pi + pi / 2.0f0) - 1.0f0) < 0.03f0
     @test G.nvertices(c) == 120
     @test G.ntriangles(c) == 40
-    @test length(c.normals) == 40
 
     # Mergin two meshes
     c = G.SolidCylinder(length = 2.0, width = 1.0, height = 1.0, n = 40)
@@ -51,8 +49,7 @@ let
     @test m2.normals == m.normals
 end
 
-# using Makie
 # import GLMakie
-# glm = G.GLMesh(c)
-# mesh(glm, color = :green)
-# wireframe!(glm)
+# import PlantViz as PV
+# PV.render(m, normals = true)
+# PV.render!(m2, normals = true, color = :red)

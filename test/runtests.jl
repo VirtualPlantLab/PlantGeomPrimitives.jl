@@ -62,6 +62,11 @@ end
     include("test_transformations.jl")
 end
 
+# Make sure normals are correct
+@testset "scenes" begin
+    include("check_normals.jl")
+end
+
 # Scenes
 @testset "scenes" begin
     include("test_scene.jl")

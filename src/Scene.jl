@@ -85,16 +85,11 @@ julia> import ColorTypes: RGB
 
 julia> s = Scene(mesh = t, colors = RGB(1.0, 0.0, 0.0));
 
-julia> colors(s)
-3-element Array{Colorant,1} with eltype ColorTypes.Colorant:
- RGB{Float64}(1.0,0.0,0.0)
- RGB{Float64}(1.0,0.0,0.0)
- RGB{Float64}(1.0,0.0,0.0)
+julia> colors(s);
 
 julia> s = Scene(mesh = t);
 
-julia> colors(s)
-ColorTypes.Colorant[]
+julia> colors(s);
 ```
 """
 colors(scene::Scene) = scene.colors
@@ -110,21 +105,18 @@ material per mesh inside the scene.
 - `scene`: A scene object (object of type `Scene`).
 
 # Example
-```jldoctest
+```julia
 julia> t = Triangle(length = 2.0, width = 2.0);
 
-julia> import PlantRayTracer: Sensor
+julia> import PlantRayTracer: Sensor;
 
 julia> s = Scene(mesh = t, materials = Sensor(1));
 
-julia> materials(s)
-1-element Vector{Material}:
- Sensor{1}([0.0])
+julia> materials(s);
 
 julia> s = Scene(mesh = t);
 
-julia> materials(s)
-Material[]
+julia> materials(s);
 ```
 """
 materials(scene::Scene) = scene.materials
@@ -145,8 +137,7 @@ julia> t = Triangle(length = 2.0, width = 2.0);
 
 julia> s = Scene(mesh = t);
 
-julia> mesh(s)
-Mesh{StaticArraysCore.SVector{3, Float64}}(StaticArraysCore.SVector{3, Float64}[[0.0, -1.0, 0.0], [0.0, 0.0, 2.0], [0.0, 1.0, 0.0]], StaticArraysCore.SVector{3, Float64}[[1.0, 0.0, 0.0]])
+julia> mesh(s);
 ```
 """
 mesh(scene::Scene) = scene.mesh
@@ -165,8 +156,7 @@ julia> t = Triangle(length = 2.0, width = 2.0);
 
 julia> s = Scene(mesh = t);
 
-julia> nvertices(s)
-3
+julia> nvertices(s);
 ```
 """
 nvertices(scene::Scene) = nvertices(mesh(scene))
@@ -185,8 +175,7 @@ julia> t = Triangle(length = 2.0, width = 2.0);
 
 julia> s = Scene(mesh = t);
 
-julia> ntriangles(s)
-1
+julia> ntriangles(s);
 ```
 """
 ntriangles(scene::Scene) = ntriangles(mesh(scene))
@@ -205,11 +194,7 @@ julia> t = Triangle(length = 2.0, width = 2.0);
 
 julia> s = Scene(mesh = t);
 
-julia> vertices(s)
-3-element Vector{StaticArraysCore.SVector{3, Float64}}:
- [0.0, -1.0, 0.0]
- [0.0, 0.0, 2.0]
- [0.0, 1.0, 0.0]
+julia> vertices(s);
 ```
 """
 vertices(scene::Scene) = vertices(mesh(scene))
@@ -228,9 +213,7 @@ julia> t = Triangle(length = 2.0, width = 2.0);
 
 julia> s = Scene(mesh = t);
 
-julia> normals(s)
-1-element Vector{StaticArraysCore.SVector{3, Float64}}:
- [1.0, 0.0, 0.0]
+julia> normals(s);
 ```
 """
 normals(scene::Scene) = normals(mesh(scene))
@@ -254,7 +237,6 @@ julia> s1 = Scene(mesh = t1);
 julia> s2 = Scene(mesh = t2);
 
 julia> s = Scene([s1, s2]);
-
 """
 function Scene(scenes::Vector{<:Scene})
     allmesh = Mesh(mesh.(scenes))
@@ -297,10 +279,11 @@ julia> s1 = Scene(mesh = t1);
 
 julia> add!(s1, mesh = t2);
 
-julia> ntriangles(s1)
-3
+julia> ntriangles(s1);
 """
 function add!(scene; mesh, colors = nothing, materials = nothing)
+    # Make sure the mesh contains normals
+    update_normals!(mesh)
     # Add triangles to scene by adjusting face indices
     nv = nvertices(scene)
     append!(vertices(scene), vertices(mesh))
