@@ -31,7 +31,7 @@ end
 
 # Constructor to avoid concrete types for colors and materials
 """
-    Scene(; mesh = Mesh(Float64), colors = Colorant[], materials = Material[])
+    Scene(; mesh = Mesh(Float64), colors = nothing, materials = nothing)
 
 Create a scene from a triangular mesh and associated colors and materials. This function
 should only be used when creating a scene from scratch. To extend an existing scene, use
