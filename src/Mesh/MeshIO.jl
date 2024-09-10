@@ -11,7 +11,7 @@ end
 function Mesh(m::GeometryBasics.Mesh)
     v = GeometryBasics.coordinates(m)
     verts = [Vec(v[f]...) for f in GeometryBasics.faces(m)]
-    construct_mesh(verts)
+    Mesh(verts)
 end
 
 """

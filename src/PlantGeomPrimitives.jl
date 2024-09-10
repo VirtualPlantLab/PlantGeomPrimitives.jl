@@ -194,7 +194,6 @@ end
 
 # Triangular meshes
 include("Mesh/Mesh.jl")
-include("Mesh/MeshConstruction.jl")
 include("Mesh/MeshIO.jl")
 include("Mesh/Transformations.jl")
 

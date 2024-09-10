@@ -2,12 +2,19 @@ import PlantGeomPrimitives as G
 #import GLMakie
 #import PlantViz as PV
 using Test
+using LinearAlgebra: ×, normalize
 
 let
 
+function compute_normal(v1, v2, v3)
+    e1 = v2 .- v1
+    e2 = v3 .- v1
+    normalize(e1 × e2)
+end
+
 # Helper functions to check the normals of a primitive
 function check_normal(v1, v2, v3, n)
-    @test all(abs.(G.normal(v1, v2, v3) .- n) .< 10eps())
+    @test all(abs.(compute_normal(v1, v2, v3) .- n) .< 10eps())
 end
 
 function check_primitive(p)

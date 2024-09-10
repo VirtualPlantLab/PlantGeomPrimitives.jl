@@ -89,6 +89,33 @@ function Mesh(nt::Number, ::Type{FT} = Float64) where {FT<:AbstractFloat}
 end
 
 
+
+"""
+    Mesh(vertices)
+
+Generate a triangular mesh from a vector of vertices.
+
+# Arguments
+- `vertices`: List of vertices (each vertex implement as `Vec`).
+
+# Returns
+A `Mesh` object.
+
+# Example
+```jldoctest
+julia> verts = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
+
+julia> Mesh(verts);
+```
+"""
+function Mesh(vertices::Vector{<:Vec})
+    VT = eltype(vertices)
+    m = Mesh(vertices, VT[])
+    update_normals!(m)
+    return m
+end
+
+
 """
     Mesh(meshes)
 
@@ -144,7 +171,7 @@ function Mesh(meshes::Vector{<:Mesh})
     Mesh(verts, norms)
 end
 
-# Calculate the normals of a mesh and add them
+# Calculate the normals of a mesh and add them (deals with partially compute normals)
 function update_normals!(m::Mesh)
     if isempty(m.normals)
         for i in 1:3:length(m.vertices)
@@ -166,6 +193,7 @@ function update_normals!(m::Mesh)
     end
     return nothing
 end
+
 """
     eltype(mesh::Mesh)
 
