@@ -9,14 +9,16 @@ let
     @test c isa G.Mesh
     @test G.area(c) === 4.0
     @test G.nvertices(c) == 24
-    @test G.ntriangles(c) == 8
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Check a different precision works
     c = G.HollowCube(length = 1.0f0, width = 1.0f0, height = 1.0f0)
     @test c isa G.Mesh
     @test G.area(c) === 4.0f0
     @test G.nvertices(c) == 24
-    @test G.ntriangles(c) == 8
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Mergin two meshes
     c2 = G.HollowCube(length = 0.5, width = 0.5, height = 3.0)

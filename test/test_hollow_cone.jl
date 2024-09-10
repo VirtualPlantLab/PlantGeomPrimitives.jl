@@ -9,14 +9,16 @@ let
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25) * pi / 2) < 0.07
     @test G.nvertices(c) == 30
-    @test G.ntriangles(c) == 10
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Check that it works for different floating point precisions
     c = G.HollowCone(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 10)
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25) * pi / 2) < 0.07
     @test G.nvertices(c) == 30
-    @test G.ntriangles(c) == 10
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Merging two meshes
     c = G.HollowCone(length = 2.0, width = 1.0, height = 1.0, n = 10)

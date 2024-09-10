@@ -10,7 +10,8 @@ let
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.1
     @test G.nvertices(c) == 60
-    @test G.ntriangles(c) == 20
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Check that it works at lower precision
     c = G.HollowFrustum(
@@ -24,7 +25,8 @@ let
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.1
     @test G.nvertices(c) == 60
-    @test G.ntriangles(c) == 20
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Mergin two meshes
     c = G.HollowFrustum(length = 2.0, width = 1.0, height = 1.0, ratio = 0.5, n = 20)

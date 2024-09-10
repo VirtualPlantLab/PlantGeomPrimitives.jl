@@ -9,7 +9,8 @@ let
     @test e isa G.Mesh
     @test abs(G.area(e) / pi - 1.0) < 0.13
     @test G.nvertices(e) == 30
-    @test G.ntriangles(e) == 10
+    @test G.ntriangles(e) == div(G.nvertices(e), 3)
+    @test length(G.normals(e)) == G.ntriangles(e)
 
     # Check a different precision works
     e = G.Ellipse(length = 2.0f0, width = 2.0f0, n = 10)

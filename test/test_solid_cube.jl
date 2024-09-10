@@ -9,14 +9,16 @@ let
     @test c isa G.Mesh
     @test G.area(c) == 6.0
     @test G.nvertices(c) == 36
-    @test G.ntriangles(c) == 12
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Check that it works at lower precision
     c = G.SolidCube(length = 1.0f0, width = 1.0f0, height = 1.0f0)
     @test c isa G.Mesh
     @test G.area(c) == 6.0f0
     @test G.nvertices(c) == 36
-    @test G.ntriangles(c) == 12
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
 
     # Mergin two meshes

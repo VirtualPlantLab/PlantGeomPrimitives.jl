@@ -8,14 +8,16 @@ let
     @test c isa G.Mesh
     @test abs(G.area(c) / pi - 2.0) < 0.04
     @test G.nvertices(c) == 60
-    @test G.ntriangles(c) == 20
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Check that it works with lower precision
     c = G.HollowCylinder(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 20)
     @test c isa G.Mesh
     @test abs(G.area(c) / pi - 2.0f0) < 0.04f0
     @test G.nvertices(c) == 60
-    @test G.ntriangles(c) == 20
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Merging two meshes
     c = G.HollowCylinder(length = 2.0, width = 1.0, height = 1.0, n = 20)

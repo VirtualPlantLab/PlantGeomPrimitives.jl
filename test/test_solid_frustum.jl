@@ -10,7 +10,8 @@ let
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2) + pi * (0.5^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.15
     @test G.nvertices(c) == 120
-    @test G.ntriangles(c) == 40
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Check that it works at lower precision
     c = G.SolidFrustum(length = 2.0f0, width = 1.0f0, height = 1.0f0, ratio = 0.5f0, n = 40)
@@ -18,7 +19,8 @@ let
     exact_area = (pi + 0.5pi) / 2 * sqrt(2^2 + 0.25^2) + pi * (0.5^2 + 0.25^2)
     @test abs(G.area(c) - exact_area) < 0.15f0
     @test G.nvertices(c) == 120
-    @test G.ntriangles(c) == 40
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Merging two meshes
     c = G.SolidFrustum(length = 2.0, width = 1.0, height = 1.0, ratio = 0.5, n = 40)

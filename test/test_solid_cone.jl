@@ -9,14 +9,16 @@ let
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25^2) * pi / 2 - pi * 0.25) < 0.05
     @test G.nvertices(c) == 120
-    @test G.ntriangles(c) == 40
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Check that it works with lower precision
     c = G.SolidCone(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 40)
     @test c isa G.Mesh
     @test abs(G.area(c) - sqrt(4 + 0.25^2) * pi / 2 - pi * 0.25) < 0.05f0
     @test G.nvertices(c) == 120
-    @test G.ntriangles(c) == 40
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Mergin two meshes
     c = G.SolidCone(length = 2.0, width = 1.0, height = 1.0, n = 40)

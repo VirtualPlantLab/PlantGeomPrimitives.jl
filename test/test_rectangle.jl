@@ -9,7 +9,8 @@ let
     @test r isa G.Mesh
     @test G.area(r) == 4.0
     @test G.nvertices(r) == 6
-    @test G.ntriangles(r) == 2
+    @test G.ntriangles(r) == div(G.nvertices(r), 3)
+    @test length(G.normals(r)) == G.ntriangles(r)
 
     # Check that it works with lower precision
     r = G.Rectangle(length = 2.0f0, width = 2.0f0)

@@ -9,14 +9,16 @@ let
     @test c isa G.Mesh
     @test abs(G.area(c) / (2pi + pi / 2) - 1.0) < 0.03
     @test G.nvertices(c) == 120
-    @test G.ntriangles(c) == 40
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Checking that it works at lower precisions
     c = G.SolidCylinder(length = 2.0f0, width = 1.0f0, height = 1.0f0, n = 40)
     @test c isa G.Mesh
     @test abs(G.area(c) / (2.0f0pi + pi / 2.0f0) - 1.0f0) < 0.03f0
     @test G.nvertices(c) == 120
-    @test G.ntriangles(c) == 40
+    @test G.ntriangles(c) == div(G.nvertices(c), 3)
+    @test length(G.normals(c)) == G.ntriangles(c)
 
     # Mergin two meshes
     c = G.SolidCylinder(length = 2.0, width = 1.0, height = 1.0, n = 40)

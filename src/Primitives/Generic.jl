@@ -4,12 +4,14 @@
 function Primitive(trans::AbstractAffineMap, vertices)
     FT = eltype(trans.linear)
     verts = collect(Vec{FT}, vertices(trans))
-    Mesh(verts, Vec{FT}[])
+    m = Mesh(verts, Vec{FT}[])
+    update_normals!(m)
+    return m
 end
 
 # Create a primitive from affine transformation and add it in-place to existing mesh
 function Primitive!(m::Mesh, trans::AbstractAffineMap, vertices)
-    nv = length(m.vertices)
     append!(m.vertices, vertices(trans))
+    update_normals!(m)
     nothing
 end

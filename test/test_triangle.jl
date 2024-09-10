@@ -9,15 +9,16 @@ let
     @test r isa G.Mesh
     @test G.area(r) == 2
     @test G.nvertices(r) == 3
-    @test G.ntriangles(r) == 1
+    @test G.ntriangles(r) == div(G.nvertices(r), 3)
+    @test length(G.normals(r)) == G.ntriangles(r)
 
     # Check that it works with lower precision
     r = G.Triangle(length = 2.0f0, width = 2.0f0)
     @test r isa G.Mesh
     @test G.area(r) == 2.0f0
     @test G.nvertices(r) == 3
-    @test G.ntriangles(r) == 1
-
+    @test G.ntriangles(r) == div(G.nvertices(r), 3)
+    @test length(G.normals(r)) == G.ntriangles(r)
     # Merging two meshes
     r = G.Triangle(length = 2.0, width = 2.0)
     r2 = G.Triangle(length = 3.0, width = 0.1)
