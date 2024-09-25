@@ -15,8 +15,7 @@ and ray tracing. The scene object is a container for the following fields:
 
 - `mesh`: A triangular mesh (object of type `PlantGeomPrimitives.Mesh`).
 - `colors`: A vector of colors (any type that inherits from `ColorTypes.Colorant`).
-- `material_ids`: A vector of integers that represent the material associated with each
-triangle in the mesh.
+- `material_ids`: A vector of integers that represent the material associated with each triangle in the mesh.
 - `materials`: A vector of materials (object of types that inherit from `PlantGeomPrimitives.Material`).
 
 Several constructors are available to create a scene from scratch or to extend an existing
@@ -40,22 +39,13 @@ directly.
 
 # Arguments
 - `mesh`: A triangular mesh (object of type `PlantGeomPrimitives.Mesh`).
-
-- `colors`: A vector of colors (any type that inherits from `ColorTypes.Colorant`). There
-should be one color per triangle in the mesh or a single color (such that all triangles get
-the same color). This is an optional argument, but if no colors are provided, it the
-resulting scene cannot be visualized (the function `rennder()` will throw an error).
-
-- `materials`: A vector of materials (object of type `PlantRayTracer.Material`). There should
-be one material per triangle in the mesh or a single material (such that all triangles get the
-same material). This is an optional argument, but if no materials are provided, the resulting
-scene cannot be used for ray tracing.
+- `colors`: A vector of colors (any type that inherits from `ColorTypes.Colorant`). There should be one color per triangle in the mesh or a single color (such that all triangles get the same color). This is an optional argument, but if no colors are provided, it the resulting scene cannot be visualized (the function `rennder()` will throw an error).
+- `materials`: A vector of materials (object of type `PlantRayTracer.Material`). There should be one material per triangle in the mesh or a single material (such that all triangles get the same material). This is an optional argument, but if no materials are provided, the resulting scene cannot be used for ray tracing.
 
 ```jldoctest
 julia> t = Triangle(length = 2.0, width = 2.0);
 
 julia> s = Scene(mesh = t);
-
 ```
 """
 function Scene(;mesh = Mesh(Float64), colors = nothing, materials = nothing)
@@ -237,6 +227,7 @@ julia> s1 = Scene(mesh = t1);
 julia> s2 = Scene(mesh = t2);
 
 julia> s = Scene([s1, s2]);
+```
 """
 function Scene(scenes::Vector{<:Scene})
     allmesh = Mesh(mesh.(scenes))
@@ -280,6 +271,7 @@ julia> s1 = Scene(mesh = t1);
 julia> add!(s1, mesh = t2);
 
 julia> ntriangles(s1);
+```
 """
 function add!(scene; mesh, colors = nothing, materials = nothing)
     # Make sure the mesh contains normals

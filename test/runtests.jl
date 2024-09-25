@@ -71,3 +71,8 @@ end
 @testset "scenes" begin
     include("test_scene.jl")
 end
+
+# Mesh I/O
+@testset "mesh_io" begin
+    include("test_meshio.jl")
+end

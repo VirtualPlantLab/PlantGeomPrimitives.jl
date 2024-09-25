@@ -60,7 +60,7 @@ discretized into `n` triangles (must be even) and standard location and orientat
 
 # Examples
 ```jldoctest
-julia> HollowFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40);
+julia> HollowFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40, ratio = 0.5);
 ```
 """
 function HollowFrustum(;length::FT = 1.0, width::FT = 1.0, height::FT = 1.0,ratio::FT = 1.0,

@@ -178,7 +178,7 @@ function update_normals!(m::Mesh)
             @inbounds v1 = m.vertices[i]
             @inbounds v2 = m.vertices[i+1]
             @inbounds v3 = m.vertices[i+2]
-            n = normalize(cross(v2 - v1, v3 - v1))
+            n = normalize(cross(v2 .- v1, v3 .- v1))
             push!(m.normals, n)
         end
     elseif length(normals(m)) != div(length(vertices(m)), 3)
@@ -187,7 +187,7 @@ function update_normals!(m::Mesh)
             @inbounds v1 = m.vertices[i + 1]
             @inbounds v2 = m.vertices[i + 2]
             @inbounds v3 = m.vertices[i + 3]
-            n = normalize(cross(v2 - v1, v3 - v1))
+            n = normalize(cross(v2 .- v1, v3 .- v1))
             push!(m.normals, n)
         end
     end

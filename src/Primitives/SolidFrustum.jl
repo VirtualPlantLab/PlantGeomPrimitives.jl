@@ -63,7 +63,7 @@ discretized into `n` triangles and standard location and orientation.
 
 # Examples
 ```jldoctest
-julia> SolidFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40);
+julia> SolidFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40, ratio = 0.5);
 ```
 """
 function SolidFrustum(;
