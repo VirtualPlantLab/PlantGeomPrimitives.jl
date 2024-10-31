@@ -14,14 +14,14 @@ function TriangleVertices(trans)
     FT = eltype(trans)
     TriangleVertices(trans, all_triangle_vertices(FT))
 end
-function iterate(r::RV)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:TriangleVertices}
+function Base.iterate(r::RV)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:TriangleVertices}
     (@inbounds r.trans(r.verts[1]), 2)
 end
-function iterate(r::RV, i)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:TriangleVertices}
+function Base.iterate(r::RV, i)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:TriangleVertices}
     i > 3 ? nothing : (@inbounds r.trans(r.verts[i]), i + 1)
 end
-length(r::TriangleVertices) = 3
-function eltype(::Type{TriangleVertices{VT,TT}}) where {VT,TT}
+Base.length(r::TriangleVertices) = 3
+function Base.eltype(::Type{TriangleVertices{VT,TT}}) where {VT,TT}
     @inbounds VT.types[1]
 end
 
@@ -46,14 +46,14 @@ julia> Triangle(;length = 1.0, width = 1.0);
 ```
 """
 function Triangle(; length::FT = 1.0, width::FT = 1.0) where {FT}
-    trans = LinearMap(SDiagonal(one(FT), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(one(FT), width / FT(2), length))
     Triangle(trans)
 end
 
 # Create a triangle from affine transformation
-Triangle(trans::AbstractAffineMap) =
+Triangle(trans::CT.AbstractAffineMap) =
     Primitive(trans, TriangleVertices)
 
 # Create a triangle from affine transformation and add it in-place to existing mesh
-Triangle!(m::Mesh, trans::AbstractAffineMap) =
+Triangle!(m::Mesh, trans::CT.AbstractAffineMap) =
     Primitive!(m, trans, TriangleVertices)

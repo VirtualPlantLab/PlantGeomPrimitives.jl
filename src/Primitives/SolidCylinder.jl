@@ -9,7 +9,7 @@ function SolidCylinderVertices(n, trans)
     FT = eltype(trans.linear)
     SolidCylinderVertices(n, FT(2pi / n), trans)
 end
-function iterate(c::SolidCylinderVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(c::SolidCylinderVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i < 3*c.n + 1 # Odd triangles
         j = div(i - 1, 3) + 1 # 3:n
         v = mod(i - 1 , 3) + 1
@@ -40,8 +40,8 @@ function iterate(c::SolidCylinderVertices{FT,TT},i::Int = 1)::Union{Nothing,Tupl
         nothing
     end
 end
-length(c::SolidCylinderVertices) = 12c.n
-eltype(::Type{SolidCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
+Base.length(c::SolidCylinderVertices) = 12c.n
+Base.eltype(::Type{SolidCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
 """
@@ -62,19 +62,19 @@ julia> SolidCylinder(;length = 1.0, width = 1.0, height = 1.0, n = 80);
 ```
 """
 function SolidCylinder(;length::FT = 1.0, width::FT = 1.0, height::FT = 1.0, n::Int = 80) where {FT}
-    trans = LinearMap(SDiagonal(height / FT(2), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length))
     SolidCylinder(trans, n = n)
 end
 
 # Create a SolidCylinder from affine transformation
-function SolidCylinder(trans::AbstractAffineMap; n::Int = 80)
+function SolidCylinder(trans::CT.AbstractAffineMap; n::Int = 80)
     @assert iseven(n)
     n = div(n, 4)
     Primitive(trans, x -> SolidCylinderVertices(n, x))
 end
 
 # Create a SolidCylinder from affine transformation and add it in-place to existing mesh
-function SolidCylinder!(m::Mesh, trans::AbstractAffineMap; n::Int = 80)
+function SolidCylinder!(m::Mesh, trans::CT.AbstractAffineMap; n::Int = 80)
     @assert iseven(n)
     n = div(n, 4)
     Primitive!(m, trans, x -> SolidCylinderVertices(n, x))

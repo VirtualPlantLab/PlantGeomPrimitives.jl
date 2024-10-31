@@ -3,11 +3,11 @@
 # Rotations, translations and scaling of triangular meshes
 
 # In-place affine transformation of a mesh
-function transform!(m::Mesh, trans::AbstractAffineMap)
+function transform!(m::Mesh, trans::CT.AbstractAffineMap)
     vertices(m) .= trans.(vertices(m))
     norm_trans   = transpose(inv(trans.linear))
     @simd for i in eachindex(normals(m))
-        @inbounds normals(m)[i] = normalize(norm_trans*normals(m)[i])
+        @inbounds normals(m)[i] = L.normalize(norm_trans*normals(m)[i])
     end
     return nothing
 end
@@ -32,7 +32,7 @@ julia> scale!(m, scaling_vector);
 ```
 """
 function scale!(m::Mesh, vec::Vec)
-    trans = LinearMap(SDiagonal(vec...))
+    trans = CT.LinearMap(CT.SDiagonal(vec...))
     transform!(m, trans)
 end
 
@@ -55,7 +55,7 @@ julia> rotatex!(m, θ)
 ```
 """
 function rotatex!(m::Mesh, θ)
-    trans = LinearMap(RotX(θ))
+    trans = CT.LinearMap(Rotations.RotX(θ))
     transform!(m, trans)
 end
 
@@ -78,7 +78,7 @@ julia> rotatey!(m, θ);
 ```
 """
 function rotatey!(m::Mesh, θ)
-    trans = LinearMap(RotY(θ))
+    trans = CT.LinearMap(Rotations.RotY(θ))
     transform!(m, trans)
 end
 
@@ -101,7 +101,7 @@ julia> rotatez!(m, θ);
 ```
 """
 function rotatez!(m::Mesh, θ)
-    trans = LinearMap(RotZ(θ))
+    trans = CT.LinearMap(Rotations.RotZ(θ))
     transform!(m, trans)
 end
 
@@ -112,7 +112,7 @@ Rotate a mesh `m` to a new coordinate system given by `x`, `y` and `z`
 """
 function rotate!(m::Mesh; x::Vec{FT}, y::Vec{FT}, z::Vec{FT}) where {FT}
     @inbounds mat = SMatrix{3,3,FT}(x[1], x[2], x[3], y[1], y[2], y[3], z[1], z[2], z[3])
-    trans = LinearMap(mat)
+    trans = CT.LinearMap(mat)
     transform!(m, trans)
 end
 
@@ -135,7 +135,7 @@ julia> translate!(m, v);
 ```
 """
 function translate!(m::Mesh, v::Vec)
-    trans = Translation(v)
+    trans = CT.Translation(v)
     vertices(m) .= trans.(vertices(m))
     return nothing
 end

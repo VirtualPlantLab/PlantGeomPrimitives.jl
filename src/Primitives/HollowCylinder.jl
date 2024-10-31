@@ -22,7 +22,7 @@ function HollowCylinderVertices(n, trans)
     FT = eltype(trans.linear)
     HollowCylinderVertices(n, FT(2pi / n), trans)
 end
-function iterate(c::HollowCylinderVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(c::HollowCylinderVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i < 3*c.n + 1 # Odd triangles
         j = div(i - 1, 3) + 1 # 3:n
         v = mod(i - 1 , 3) + 1
@@ -39,8 +39,8 @@ function iterate(c::HollowCylinderVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tu
         nothing
     end
 end
-length(c::HollowCylinderVertices) = 6c.n
-eltype(::Type{HollowCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
+Base.length(c::HollowCylinderVertices) = 6c.n
+Base.eltype(::Type{HollowCylinderVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
 """
@@ -66,19 +66,19 @@ function HollowCylinder(;
     height::FT = 1.0,
     n::Int = 40,
 ) where {FT}
-    trans = LinearMap(SDiagonal(height / FT(2), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length))
     HollowCylinder(trans, n = n)
 end
 
 # Create a HollowCylinder from affine transformation
-function HollowCylinder(trans::AbstractAffineMap; n::Int = 40)
+function HollowCylinder(trans::CT.AbstractAffineMap; n::Int = 40)
     @assert iseven(n)
     n = div(n, 2)
     Primitive(trans, x -> HollowCylinderVertices(n, x))
 end
 
 # Create a HollowCylinder from affine transformation and add it in-place to existing mesh
-function HollowCylinder!(m::Mesh, trans::AbstractAffineMap; n::Int = 40)
+function HollowCylinder!(m::Mesh, trans::CT.AbstractAffineMap; n::Int = 40)
     @assert iseven(n)
     n = div(n, 2)
     Primitive!(m, trans, x -> HollowCylinderVertices(n, x))

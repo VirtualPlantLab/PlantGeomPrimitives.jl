@@ -178,7 +178,7 @@ function update_normals!(m::Mesh)
             @inbounds v1 = m.vertices[i]
             @inbounds v2 = m.vertices[i+1]
             @inbounds v3 = m.vertices[i+2]
-            n = normalize(cross(v2 .- v1, v3 .- v1))
+            n = L.normalize(L.cross(v2 .- v1, v3 .- v1))
             push!(m.normals, n)
         end
     elseif length(normals(m)) != div(length(vertices(m)), 3)
@@ -187,7 +187,7 @@ function update_normals!(m::Mesh)
             @inbounds v1 = m.vertices[i + 1]
             @inbounds v2 = m.vertices[i + 2]
             @inbounds v3 = m.vertices[i + 3]
-            n = normalize(cross(v2 .- v1, v3 .- v1))
+            n = L.normalize(L.cross(v2 .- v1, v3 .- v1))
             push!(m.normals, n)
         end
     end
@@ -213,8 +213,8 @@ julia> m = Mesh(v, n);
 julia> eltype(m);
 ```
 """
-eltype(m::Mesh{VT}) where VT = eltype(VT)
-eltype(::Type{Mesh{VT}}) where VT = eltype(VT)
+Base.eltype(m::Mesh{VT}) where VT = eltype(VT)
+Base.eltype(::Type{Mesh{VT}}) where VT = eltype(VT)
 
 
 # Accessor functions
@@ -354,7 +354,7 @@ end
 function area_triangle(v1::Vec{FT}, v2::Vec{FT}, v3::Vec{FT})::FT where {FT<:AbstractFloat}
     e1 = v2 .- v1
     e2 = v3 .- v1
-    FT(0.5) * norm(e1 × e2)
+    FT(0.5) * L.norm(L.cross(e1, e2))
 end
 
 """
@@ -408,10 +408,12 @@ julia> areas(r);
 areas(m::Mesh) = [area_triangle(get_triangle(m, i)...) for i in 1:ntriangles(m)]
 
 # Check if two meshes are equal (mostly for testing)
-==(m1::Mesh, m2::Mesh) = vertices(m1) == vertices(m2) && normals(m1) == normals(m2)
+function Base.:(==)(m1::Mesh, m2::Mesh)
+    vertices(m1) == vertices(m2) && normals(m1) == normals(m2)
+end
 
 # Check if two meshes are approximately equal (mostly for testing)
-function isapprox(
+function Base.isapprox(
     m1::Mesh,
     m2::Mesh;
     atol::Real = 0.0,

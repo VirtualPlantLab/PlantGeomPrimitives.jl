@@ -9,10 +9,10 @@ function EllipseVertices(nt, trans)
     FT = eltype(trans.linear)
     EllipseVertices(nt, FT(2pi / nt), trans)
 end
-function iterate(e::EllipseVertices{FT,TT})::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(e::EllipseVertices{FT,TT})::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     (e.trans(Vec{FT}(0, 0, 1)), 2)
 end
-function iterate(e::EllipseVertices{FT,TT}, i)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(e::EllipseVertices{FT,TT}, i)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i > 3e.nt
         nothing
     elseif mod(i - 1, 3) == 0
@@ -27,8 +27,8 @@ function iterate(e::EllipseVertices{FT,TT}, i)::Union{Nothing,Tuple{Vec{FT},Int6
         (vert, i + 1)
     end
 end
-length(e::EllipseVertices) = 3e.nt
-eltype(::Type{EllipseVertices{FT}}) where {FT} = Vec{FT}
+Base.length(e::EllipseVertices) = 3e.nt
+Base.eltype(::Type{EllipseVertices{FT}}) where {FT} = Vec{FT}
 
 
 """
@@ -48,16 +48,16 @@ julia> Ellipse(;length = 1.0, width = 1.0, n = 20);
 ```
 """
 function Ellipse(; length::FT = 1.0, width::FT = 1.0, n::Int = 20) where {FT}
-    trans = LinearMap(SDiagonal(one(FT), width / FT(2), length / FT(2)))
+    trans = CT.LinearMap(CT.SDiagonal(one(FT), width / FT(2), length / FT(2)))
     Ellipse(trans; n = n)
 end
 
 # Create a ellipse from affine transformation
-function Ellipse(trans::AbstractAffineMap; n::Int = 20)
+function Ellipse(trans::CT.AbstractAffineMap; n::Int = 20)
     Primitive(trans, x -> EllipseVertices(n, x))
 end
 
 # Create a ellipse from affine transformation and add it in-place to existing mesh
-function Ellipse!(m::Mesh, trans::AbstractAffineMap; n::Int = 20)
+function Ellipse!(m::Mesh, trans::CT.AbstractAffineMap; n::Int = 20)
     Primitive!(m, trans, x -> EllipseVertices(n, x))
 end

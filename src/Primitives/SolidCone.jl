@@ -9,7 +9,7 @@ function SolidConeVertices(n, trans)
     FT = eltype(trans.linear)
     SolidConeVertices(n, FT(2pi / n), trans)
 end
-function iterate(c::SolidConeVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(c::SolidConeVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i > 6c.n
         nothing
     elseif i == 1 || mod(i - 1, 3) == 0
@@ -28,8 +28,8 @@ function iterate(c::SolidConeVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Ve
         (vert, i + 1)
     end
 end
-length(c::SolidConeVertices) = 6c.n
-eltype(::Type{SolidConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
+Base.length(c::SolidConeVertices) = 6c.n
+Base.eltype(::Type{SolidConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
 """
@@ -55,19 +55,19 @@ function SolidCone(;
     height::FT = 1.0,
     n::Int = 40,
 ) where {FT}
-    trans = LinearMap(SDiagonal(height / FT(2), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length))
     SolidCone(trans, n = n)
 end
 
 # Create a SolidCone from affine transformation
-function SolidCone(trans::AbstractAffineMap; n::Int = 40)
+function SolidCone(trans::CT.AbstractAffineMap; n::Int = 40)
     @assert mod(n, 4) == 0 && iseven(div(n, 4)) "n must be an even multiple of 4"
     n = div(n, 2)
     Primitive(trans, x -> SolidConeVertices(n, x))
 end
 
 # Create a SolidCone from affine transformation and add it in-place to existing mesh
-function SolidCone!(m::Mesh, trans::AbstractAffineMap; n::Int = 40)
+function SolidCone!(m::Mesh, trans::CT.AbstractAffineMap; n::Int = 40)
     @assert mod(n, 4) == 0 "n must be a multiple of 4"
     n = div(n, 2)
     Primitive!(m, trans, x -> SolidConeVertices(n, x))

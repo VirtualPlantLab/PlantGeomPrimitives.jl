@@ -34,14 +34,14 @@ function SolidCubeVertices(trans)
     FT = eltype(trans.linear)
     SolidCubeVertices(trans, all_solid_cube_vertices(FT))
 end
-function iterate(c::SCV,)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
+function Base.iterate(c::SCV,)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
     (@inbounds c.trans(c.verts[1]), 2)
 end
-function iterate(c::SCV,i,)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
+function Base.iterate(c::SCV,i,)::Union{Nothing,Tuple{eltype(SCV),Int64}} where {SCV<:SolidCubeVertices}
     i > 36 ? nothing : (@inbounds c.trans(c.verts[i]), i + 1)
 end
-length(c::SolidCubeVertices) = 36
-function eltype(::Type{SolidCubeVertices{VT,TT}}) where {VT,TT}
+Base.length(c::SolidCubeVertices) = 36
+function Base.eltype(::Type{SolidCubeVertices{VT,TT}}) where {VT,TT}
     @inbounds VT.types[1]
 end
 
@@ -64,11 +64,11 @@ julia> SolidCube(;length = 1.0, width = 1.0, height = 1.0);
 ```
 """
 function SolidCube(; length::FT = 1.0, width::FT = 1.0, height::FT = 1.0) where {FT}
-    SolidCube(LinearMap(SDiagonal(height / FT(2), width / FT(2), length)))
+    SolidCube(CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length)))
 end
 
 # Create a solid_cube from affine transformation
-SolidCube(trans::AbstractAffineMap) = Primitive(trans, SolidCubeVertices)
+SolidCube(trans::CT.AbstractAffineMap) = Primitive(trans, SolidCubeVertices)
 
 # Create a solid_cube from affine transformation and add it in-place to existing mesh
-SolidCube!(m::Mesh, trans::AbstractAffineMap) = Primitive!(m, trans, SolidCubeVertices)
+SolidCube!(m::Mesh, trans::CT.AbstractAffineMap) = Primitive!(m, trans, SolidCubeVertices)

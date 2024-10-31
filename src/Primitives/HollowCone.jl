@@ -21,7 +21,7 @@ function HollowConeVertices(n, trans)
     FT = eltype(trans.linear)
     HollowConeVertices(n, FT(2pi / n), trans)
 end
-function iterate(c::HollowConeVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(c::HollowConeVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i > 3c.n
         nothing
     # Tip of the cone
@@ -34,8 +34,8 @@ function iterate(c::HollowConeVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{
         (vert, i + 1)
     end
 end
-length(c::HollowConeVertices) = 3c.n
-eltype(::Type{HollowConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
+Base.length(c::HollowConeVertices) = 3c.n
+Base.eltype(::Type{HollowConeVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
 """
@@ -61,16 +61,16 @@ function HollowCone(;
     height::FT = 1.0,
     n::Int = 20,
 ) where {FT}
-    trans = LinearMap(SDiagonal(height / FT(2), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length))
     HollowCone(trans, n = n)
 end
 
 # Create a HollowCone from affine transformation
-function HollowCone(trans::AbstractAffineMap; n::Int = 20)
+function HollowCone(trans::CT.AbstractAffineMap; n::Int = 20)
     Primitive(trans, x -> HollowConeVertices(n, x))
 end
 
 # Create a HollowCone from affine transformation and add it in-place to existing mesh
-function HollowCone!(m::Mesh, trans::AbstractAffineMap; n::Int = 20)
+function HollowCone!(m::Mesh, trans::CT.AbstractAffineMap; n::Int = 20)
     Primitive!(m, trans, x -> HollowConeVertices(n, x))
 end

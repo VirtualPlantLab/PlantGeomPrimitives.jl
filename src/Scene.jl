@@ -23,7 +23,7 @@ scene.
 """
 struct Scene{VT}
     mesh::Mesh{VT}
-    colors::Vector{Colorant}
+    colors::Vector{ColorTypes.Colorant}
     material_ids::Vector{Int}
     materials::Vector{Material}
 end
@@ -51,7 +51,7 @@ julia> s = Scene(mesh = t);
 function Scene(;mesh = Mesh(Float64), colors = nothing, materials = nothing)
     @assert mesh isa Mesh
     FT = eltype(eltype(vertices(mesh)))
-    sc = Scene(Mesh(FT), Colorant[], Int[], Material[])
+    sc = Scene(Mesh(FT), ColorTypes.Colorant[], Int[], Material[])
     add!(sc, mesh = mesh, colors = colors, materials = materials)
     return sc
 end
@@ -316,7 +316,7 @@ end
 function update_color!(scene, color, ntriangles)
     if !isnothing(color)
         # All triangles share the same color
-        if color isa Colorant
+        if color isa ColorTypes.Colorant
             for _ = 1:ntriangles
                 for _ = 1:3
                     push!(colors(scene), color)

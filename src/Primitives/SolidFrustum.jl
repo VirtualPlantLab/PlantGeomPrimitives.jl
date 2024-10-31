@@ -10,7 +10,7 @@ function SolidFrustumVertices(ratio::FT, n, trans) where {FT}
     @assert eltype(trans.linear) == FT
     SolidFrustumVertices(ratio, n, FT(2 * pi / n), trans)
 end
-function iterate(c::SolidFrustumVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(c::SolidFrustumVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     # Odd triangles
     if i < 3*c.n + 1
         j = div(i - 1, 3) + 1 # 3:n
@@ -44,8 +44,8 @@ function iterate(c::SolidFrustumVertices{FT,TT},i::Int = 1)::Union{Nothing,Tuple
     end
 end
 
-length(c::SolidFrustumVertices) = 12c.n
-eltype(::Type{SolidFrustumVertices{FT,TT}}) where {FT,TT} = Vec{FT}
+Base.length(c::SolidFrustumVertices) = 12c.n
+Base.eltype(::Type{SolidFrustumVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
 """
@@ -73,19 +73,19 @@ function SolidFrustum(;
     ratio::FT = 1.0,
     n::Int = 40,
 ) where {FT}
-    trans = LinearMap(SDiagonal(height / FT(2), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length))
     SolidFrustum(ratio, trans, n = n)
 end
 
 # Create a SolidFrustum from affine transformation
-function SolidFrustum(ratio, trans::AbstractAffineMap; n::Int = 40)
+function SolidFrustum(ratio, trans::CT.AbstractAffineMap; n::Int = 40)
     @assert iseven(n)
     n = div(n, 4)
     Primitive(trans, x -> SolidFrustumVertices(ratio, n, x))
 end
 
 # Create a SolidFrustum from affine transformation and add it in-place to existing mesh
-function SolidFrustum!(m::Mesh, ratio, trans::AbstractAffineMap; n::Int = 40)
+function SolidFrustum!(m::Mesh, ratio, trans::CT.AbstractAffineMap; n::Int = 40)
     @assert iseven(n)
     n = div(n, 4)
     Primitive!(m, trans, x -> SolidFrustumVertices(ratio, n, x))

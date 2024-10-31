@@ -30,14 +30,14 @@ function HollowCubeVertices(trans)
     FT = eltype(trans.linear)
     HollowCubeVertices(trans, all_hollow_cube_vertices(FT))
 end
-function iterate(c::HCV)::Union{Nothing,Tuple{eltype(HCV),Int64}} where {HCV<:HollowCubeVertices}
+function Base.iterate(c::HCV)::Union{Nothing,Tuple{eltype(HCV),Int64}} where {HCV<:HollowCubeVertices}
     (@inbounds c.trans(c.verts[1]), 2)
 end
-function iterate(c::HCV,i)::Union{Nothing,Tuple{eltype(HCV),Int64}} where {HCV<:HollowCubeVertices}
+function Base.iterate(c::HCV,i)::Union{Nothing,Tuple{eltype(HCV),Int64}} where {HCV<:HollowCubeVertices}
     i > 24 ? nothing : (@inbounds c.trans(c.verts[i]), i + 1)
 end
-length(c::HollowCubeVertices) = 24
-function eltype(::Type{HollowCubeVertices{VT,TT}}) where {VT,TT}
+Base.length(c::HollowCubeVertices) = 24
+function Base.eltype(::Type{HollowCubeVertices{VT,TT}}) where {VT,TT}
     @inbounds VT.types[1]
 end
 
@@ -58,13 +58,13 @@ julia> HollowCube(;length = 1.0, width = 1.0, height = 1.0);
 ```
 """
 function HollowCube(; length::FT = 1.0, width::FT = 1.0, height::FT = 1.0) where {FT}
-    HollowCube(LinearMap(SDiagonal(height / FT(2), width / FT(2), length)))
+    HollowCube(CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length)))
 end
 
 # Create a hollow_cube from affine transformation
-HollowCube(trans::AbstractAffineMap) =
+HollowCube(trans::CT.AbstractAffineMap) =
     Primitive(trans, HollowCubeVertices)
 
 # Create a hollow_cube from affine transformation and add it in-place to existing mesh
-HollowCube!(m::Mesh, trans::AbstractAffineMap) =
+HollowCube!(m::Mesh, trans::CT.AbstractAffineMap) =
     Primitive!(m, trans, HollowCubeVertices)

@@ -1,5 +1,5 @@
 import PlantGeomPrimitives as G
-import ColorTypes: RGB
+import ColorTypes: RGB, Colorant
 using Test
 
 # Note: Colorant is an abstract type from the ColorTypes package
@@ -20,7 +20,7 @@ sc = G.Scene()
 @test G.nvertices(sc) == 0
 @test G.normals(sc) isa Array{G.Vec{Float64}, 1}
 @test isempty(G.normals(sc))
-@test G.colors(sc) isa Array{G.Colorant, 1}
+@test G.colors(sc) isa Array{Colorant, 1}
 @test isempty(G.colors(sc))
 @test G.materials(sc) isa Array{G.Material, 1}
 @test isempty(G.materials(sc))

@@ -24,7 +24,7 @@ function HollowFrustumVertices(ratio::FT, n, trans) where {FT}
     @assert eltype(trans.linear) == FT
     HollowFrustumVertices(ratio, n, FT(2 * pi / n), trans)
 end
-function iterate(c::HollowFrustumVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
+function Base.iterate(c::HollowFrustumVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tuple{Vec{FT},Int64}} where {FT,TT}
     if i < 3*c.n + 1 # Odd triangles
         j = div(i - 1, 3) + 1 # 3:n
         v = mod(i - 1 , 3) + 1
@@ -41,8 +41,8 @@ function iterate(c::HollowFrustumVertices{FT,TT}, i::Int = 1)::Union{Nothing,Tup
         nothing
     end
 end
-length(c::HollowFrustumVertices) = 6c.n
-eltype(::Type{HollowFrustumVertices{FT,TT}}) where {FT,TT} = Vec{FT}
+Base.length(c::HollowFrustumVertices) = 6c.n
+Base.eltype(::Type{HollowFrustumVertices{FT,TT}}) where {FT,TT} = Vec{FT}
 
 
 """
@@ -65,19 +65,19 @@ julia> HollowFrustum(;length = 1.0, width = 1.0, height = 1.0, n = 40, ratio = 0
 """
 function HollowFrustum(;length::FT = 1.0, width::FT = 1.0, height::FT = 1.0,ratio::FT = 1.0,
                        n::Int = 40) where {FT}
-    trans = LinearMap(SDiagonal(height / FT(2), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(height / FT(2), width / FT(2), length))
     HollowFrustum(ratio, trans, n = n)
 end
 
 # Create a HollowFrustum from affine transformation
-function HollowFrustum(ratio, trans::AbstractAffineMap; n::Int = 40)
+function HollowFrustum(ratio, trans::CT.AbstractAffineMap; n::Int = 40)
     @assert iseven(n)
     n = div(n, 2)
     Primitive(trans, x -> HollowFrustumVertices(ratio, n, x))
 end
 
 # Create a HollowFrustum from affine transformation and add it in-place to existing mesh
-function HollowFrustum!(m::Mesh, ratio, trans::AbstractAffineMap; n::Int = 40)
+function HollowFrustum!(m::Mesh, ratio, trans::CT.AbstractAffineMap; n::Int = 40)
     @assert iseven(n)
     n = div(n, 2)
     Primitive!(m, trans, x -> HollowFrustumVertices(ratio, n, x))

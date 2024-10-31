@@ -2,68 +2,20 @@ module PlantGeomPrimitives
 
 import StaticArrays: SVector, SMatrix
 import GeometryBasics
-import Base: ==, ≈, iterate, length, eltype, isapprox
+import Base
 import FileIO, MeshIO
-import LinearAlgebra: ×, norm, normalize, Diagonal, cross, ⋅
-import CoordinateTransformations:
-    SDiagonal, LinearMap, AffineMap, AbstractAffineMap, Translation
-import Rotations: RotX, RotY, RotZ
-import ColorTypes: Colorant
+import LinearAlgebra as L⋅
+import CoordinateTransformations as CT
+import Rotations
+import ColorTypes
 
-export area,
-    areas,
-    Mesh,
-    Scene,
-    add!,
-    Material,
-    ntriangles,
-    nvertices,
-    materials,
-    colors,
-    mesh,
-    nvertices,
-    vertices,
-    normals,
-    load_mesh,
-    save_mesh,
-    scale!,
-    rotatex!,
-    rotatey!,
-    rotatez!,
-    rotate!,
-    translate!,
-    Vec,
-    O,
-    X,
-    Y,
-    Z,
-    Triangle,
-    Rectangle,
-    Trapezoid,
-    SolidCube,
-    HollowCube,
-    BBox,
-    Ellipse,
-    HollowCylinder,
-    SolidCylinder,
-    HollowCone,
-    SolidCone,
-    HollowFrustum,
-    SolidFrustum,
-    Ellipsoid,
-    Triangle!,
-    Rectangle!,
-    Trapezoid!,
-    SolidCube!,
-    Ellipse!,
-    HollowCube!,
-    HollowCylinder!,
-    SolidCylinder!,
-    HollowCone!,
-    SolidCone!,
-    HollowFrustum!,
-    SolidFrustum!,
-    get_triangle
+export area, areas, Mesh, Scene, add!, Material, ntriangles, nvertices, materials, colors,
+       mesh, nvertices, vertices, normals, load_mesh, save_mesh, scale!, rotatex!,
+       rotatey!, rotatez!, rotate!, translate!, Vec, O, X, Y, Z, Triangle, Rectangle,
+       Trapezoid, SolidCube, HollowCube, BBox, Ellipse, HollowCylinder, SolidCylinder,
+       HollowCone, SolidCone, HollowFrustum, SolidFrustum, Ellipsoid, Triangle!, Rectangle!,
+       Trapezoid!, SolidCube!, Ellipse!, HollowCube!, HollowCylinder!, SolidCylinder!,
+       HollowCone!, SolidCone!, HollowFrustum!, SolidFrustum!, get_triangle
 
 abstract type Material end
 

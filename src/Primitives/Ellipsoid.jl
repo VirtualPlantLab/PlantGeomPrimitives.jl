@@ -6,7 +6,7 @@ function equal_solid_angles(n)
     uθₗ = 0.0:Δθ:π/2-Δθ
     uθᵤ = Δθ:Δθ:π/2
 
-    # Calculate number of azimuth sectors and ΔΦ per zenith ring 
+    # Calculate number of azimuth sectors and ΔΦ per zenith ring
     fac = cos.(uθₗ) - cos.(uθᵤ)
     n2 = n * n
     ns = round.(fac ./ sum(fac) .* n2)
@@ -51,11 +51,11 @@ function Ellipsoid(l::Number, w::Number, h::Number, n::Number)
 end
 
 # Create a ellipsoid from affine transformation
-function Ellipsoid(trans::AbstractAffineMap, nt::Number)
+function Ellipsoid(trans::CT.AbstractAffineMap, nt::Number)
     @error "Ellipsoid not implemented yet"
 end
 
 # Create a ellipsoid from affine transformation and add it in-place to existing mesh
-function Ellipsoid(m::Mesh, trans::AbstractAffineMap, nt::Int)
+function Ellipsoid(m::Mesh, trans::CT.AbstractAffineMap, nt::Int)
     @error "Ellipsoid not implemented yet"
 end

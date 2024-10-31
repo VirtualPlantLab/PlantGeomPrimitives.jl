@@ -14,15 +14,15 @@ function RectangleVertices(trans)
     FT = eltype(trans.linear)
     RectangleVertices(trans, all_rectangle_vertices(FT))
 end
-function iterate(r::RV, i::Int = 1)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:RectangleVertices}
+function Base.iterate(r::RV, i::Int = 1)::Union{Nothing,Tuple{eltype(RV),Int64}} where {RV<:RectangleVertices}
      i < 4 && return (@inbounds r.trans(r.verts[i]), i + 1)
      i == 4 && return (@inbounds r.trans(r.verts[1]), i + 1)
      i == 5 && return (@inbounds r.trans(r.verts[3]), i + 1)
      i == 6 && return (@inbounds r.trans(r.verts[4]), i + 1)
      i == 7 && return nothing
 end
-length(r::RectangleVertices) = 6
-function eltype(::Type{RectangleVertices{VT,TT}}) where {VT,TT}
+Base.length(r::RectangleVertices) = 6
+function Base.eltype(::Type{RectangleVertices{VT,TT}}) where {VT,TT}
     @inbounds VT.types[1]
 end
 
@@ -47,12 +47,12 @@ julia> Rectangle(;length = 1.0, width = 1.0);
 ```
 """
 function Rectangle(; length::FT = 1.0, width::FT = 1.0) where {FT}
-    trans = LinearMap(SDiagonal(one(FT), width / FT(2), length))
+    trans = CT.LinearMap(CT.SDiagonal(one(FT), width / FT(2), length))
     Rectangle(trans)
 end
 
 # Create a rectangle from affine transformation
-Rectangle(trans::AbstractAffineMap) = Primitive(trans, RectangleVertices)
+Rectangle(trans::CT.AbstractAffineMap) = Primitive(trans, RectangleVertices)
 
 # Create a rectangle from affine transformation and add it in-place to existing mesh
-Rectangle!(m::Mesh, trans::AbstractAffineMap) = Primitive!(m, trans, RectangleVertices)
+Rectangle!(m::Mesh, trans::CT.AbstractAffineMap) = Primitive!(m, trans, RectangleVertices)
