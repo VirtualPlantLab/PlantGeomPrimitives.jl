@@ -4,7 +4,7 @@ import StaticArrays: SVector, SMatrix
 import GeometryBasics
 import Base
 import FileIO, MeshIO
-import LinearAlgebra as L⋅
+import LinearAlgebra as L
 import CoordinateTransformations as CT
 import Rotations
 import ColorTypes
