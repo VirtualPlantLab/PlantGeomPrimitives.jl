@@ -15,7 +15,7 @@ julia> m = Rectangle();
 julia> box = BBox(m);
 ```
 """
-function BBox(m::Mesh{VT}) where {VT<:Vec{FT}} where {FT}
+function BBox(m::Mesh{FT}) where {FT<:AbstractFloat}
     @inbounds xmin, ymin, zmin = vertices(m)[1]
     xmax, ymax, zmax = xmin, ymin, zmin
     for v in m.vertices
@@ -55,9 +55,9 @@ julia> box = BBox(p0, p1);
 """
 function BBox(pmin::Vec{FT}, pmax::Vec{FT}) where {FT}
     @inbounds begin
-        h = pmax[1] - pmin[1]
-        w = pmax[2] - pmin[2]
-        l = pmax[3] - pmin[3]
+        h = pmax[1] - pmin[1] + eps(FT)
+        w = pmax[2] - pmin[2] + eps(FT)
+        l = pmax[3] - pmin[3] + eps(FT)
         v2 = pmin .+ Vec{FT}(0, w, 0)
         v3 = v2 .+ Vec{FT}(h, 0, 0)
         v4 = v3 .+ Vec{FT}(0, -w, 0)

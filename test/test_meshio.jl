@@ -13,7 +13,7 @@ let
     @test G.area(c) ≈ G.area(c2)
     @test G.ntriangles(c) == G.ntriangles(c2)
     @test G.nvertices(c2) == G.ntriangles(c2) * 3
-    @test c.normals == c2.normals
+    @test G.normals(c) ≈ G.normals(c2)
     @test G.BBox(c) ≈ G.BBox(c2)
 
     # ASCII STL
@@ -22,7 +22,7 @@ let
     @test isapprox(G.area(c), G.area(c2), atol = 4e-7)
     @test G.ntriangles(c) == G.ntriangles(c2)
     @test G.nvertices(c2) == G.ntriangles(c2) * 3
-    @test c.normals ≈ c2.normals
+    @test G.normals(c) ≈ G.normals(c2)
     @test isapprox(G.BBox(c), G.BBox(c2), atol = 4e-7)
 
     # BINARY PLY
@@ -36,7 +36,7 @@ let
     @test G.area(c) ≈ G.area(c2)
     @test G.ntriangles(c) == G.ntriangles(c2)
     @test G.nvertices(c) == G.nvertices(c2)
-    @test c.normals ≈ c2.normals
+    @test G.normals(c) ≈ G.normals(c2)
     @test G.BBox(c) ≈ G.BBox(c2)
 
     # OBJ
@@ -45,7 +45,7 @@ let
     @test G.area(c) ≈ G.area(c2)
     @test G.ntriangles(c) == G.ntriangles(c2)
     @test G.nvertices(c) == G.nvertices(c2)
-    @test c.normals ≈ c2.normals
+    @test G.normals(c) ≈ G.normals(c2)
     @test G.BBox(c) ≈ G.BBox(c2)
 
 end

@@ -4,7 +4,7 @@
 function Primitive(trans::CT.AbstractAffineMap, vertices)
     FT = eltype(trans.linear)
     verts = collect(Vec{FT}, vertices(trans))
-    m = Mesh(verts, Vec{FT}[])
+    m = Mesh(verts)
     update_normals!(m)
     return m
 end

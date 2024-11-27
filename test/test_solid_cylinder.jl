@@ -36,8 +36,8 @@ let
     # Create a Solid cylinder using affine maps
     scale = LinearMap(SDiagonal(0.2 / 2, 0.1 / 2, 3.0))
     c3 = G.SolidCylinder(scale, n = 40)
-    @test c3.normals == c2.normals
-    @test c3.vertices == c2.vertices
+    @test G.normals(c3) == G.normals(c2)
+    @test G.vertices(c3) == G.vertices(c2)
 
     # Create a cylinder ussing affine maps and add it to an existing mesh
     function foo2()
@@ -47,8 +47,8 @@ let
         m
     end
     m2 = foo2()
-    @test m2.vertices == m.vertices
-    @test m2.normals == m.normals
+    @test G.normals(m2) == G.normals(m)
+    @test G.vertices(m2) == G.vertices(m)
 end
 
 # import GLMakie
