@@ -181,11 +181,11 @@ julia> m = Mesh([e,r]);
 function Mesh(meshes::Vector{<:Mesh})
     @assert !isempty(meshes) "At least one mesh must be provided"
     @inbounds verts = copy(vertices(meshes[1]))
-    @inbounds props = deepcopy(properties(meshes[1]))
+    @inbounds props = properties(meshes[1])
     if length(meshes) > 1
         @inbounds for i in 2:length(meshes)
-            verts = append!(verts, vertices(meshes[i]))
-            props = add_properties!(props, properties(meshes[i]))
+            append!(verts, vertices(meshes[i]))
+            add_properties!(props, properties(meshes[i]))
         end
     end
     Mesh(verts, props)
