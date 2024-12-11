@@ -9,7 +9,7 @@ import CoordinateTransformations as CT
 import Rotations
 
 export area, areas, Mesh, ntriangles, nvertices, vertices, normals,
-load_mesh, save_mesh, scale!, rotatex!,
+       load_mesh, save_mesh, scale!, rotatex!,
        rotatey!, rotatez!, rotate!, translate!, Vec, O, X, Y, Z, Triangle, Rectangle,
        Trapezoid, SolidCube, HollowCube, BBox, Ellipse, HollowCylinder, SolidCylinder,
        HollowCone, SolidCone, HollowFrustum, SolidFrustum, Ellipsoid, Triangle!, Rectangle!,
