@@ -132,15 +132,22 @@ function add_properties!(p1::Dict{Symbol, AbstractVector}, p2::Dict{Symbol, Abst
 end
 
 """
-    Mesh(vertices)
+    add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
 
-Generate a triangular mesh from a vector of vertices.
+Add a property to a mesh. The property is identified by a name (`prop`) and is stored as an
+array of values (`data`), one per triangle. If the property already exists, the new data is
+appended to the existing property, otherwise a new property is created. It is possible to
+pass a single object for `data`, in which case the property will be set to the same value for
+all triangles.
 
 # Arguments
-- `vertices`: List of vertices (each vertex implement as `Vec`).
+- `mesh`: The mesh to which the property is to be added.
+- `prop`: The name of the property to be added as a `Symbol`.
+- `data`: The data to be added to the property (an array or a single value).
+- `nt`: The number of triangles to be assumed if `data` is not an array. By default this is the number of triangles in the mesh.
 
 # Returns
-A `Mesh` object.
+The mesh with updated properties.
 
 # Example
 ```jldoctest
@@ -149,11 +156,13 @@ julia> r = Rectangle();
 julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
 ```
 """
-function add_property!(m::Mesh, prop::Symbol, data::AbstractVector)
+function add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
+    # Check if the data is an array and if not convert it to an array with length nt
+    vecdata = data isa AbstractVector ? data : fill(data, nt)
     if !haskey(properties(m), prop)
-        properties(m)[prop] = data
+        properties(m)[prop] = vecdata
     else
-        append!(properties(m)[prop], data)
+        append!(properties(m)[prop], vecdata)
     end
     return m
 end
@@ -453,4 +462,44 @@ function Base.isapprox(m1::Mesh, m2::Mesh; atol::Real = 0.0,
                       rtol::Real = atol > 0.0 ? 0.0 : sqrt(eps(1.0)))
     isapprox(vertices(m1), vertices(m2), atol = atol, rtol = rtol) &&
         isapprox(normals(m1), normals(m2), atol = atol, rtol = rtol)
+end
+
+
+"""
+    add!(mesh1, mesh2; kwargs...)
+
+Manually add a mesh to an existing mesh with optional properties captured as keywords. Make
+sure to be consistent with the properties (both meshes should end up with the same lsit of
+properties). For example, if the scene was created with `:colors``, then you should provide
+`:colors`` for the new mesh as well.
+
+# Arguments
+- `mesh1`: The current mesh we want to extend.
+- `mesh1`: A new mesh we want to add.
+- `kwargs`: Properties to be set per triangle in the new mesh.
+
+# Example
+```jldoctest
+julia> t1 = Triangle(length = 1.0, width = 1.0);
+
+julia> using ColorTypes: RGB
+
+julia> add_property!(t1, :colors, rand(RGB));
+
+julia> t2 = Rectangle(length = 5.0, width = 0.5);
+
+julia> add!(t1, t2, colors = rand(RGB));
+```
+"""
+function add!(mesh1, mesh2; kwargs...)
+    # Make sure the mesh contains normals
+    update_normals!(mesh2)
+    # Add the vertices and normals
+    append!(vertices(mesh1), vertices(mesh2))
+    add_property!(mesh1, :normal, normals(mesh2))
+    # Set optional properties per triangle
+    for (k, v) in kwargs
+        add_property!(mesh1, k, v, ntriangles(mesh2))
+    end
+    return mesh1
 end
