@@ -159,10 +159,21 @@ julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
 function add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
     # Check if the data is an array and if not convert it to an array with length nt
     vecdata = data isa AbstractVector ? data : fill(data, nt)
+    # Create new property if the one being added does not exist
     if !haskey(properties(m), prop)
         properties(m)[prop] = vecdata
+    # Otherwise append the data to the existing property creating an union type if necessary
+    # when the type of `data` does not inherit from the type of the existing property
     else
-        append!(properties(m)[prop], vecdata)
+        etype1 = eltype(properties(m)[prop])
+        etype2 = eltype(vecdata)
+        if etype2 isa etype1
+            append!(properties(m)[prop], vecdata)
+        else
+            etype3 = Union{etype1, etype2}
+            properties(m)[prop] = convert(Vector{etype3}, properties(m)[prop])
+            append!(properties(m)[prop], vecdata)
+        end
     end
     return m
 end

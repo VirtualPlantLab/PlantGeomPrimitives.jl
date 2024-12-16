@@ -71,3 +71,8 @@ end
 @testset "mesh_io" begin
     include("test_meshio.jl")
 end
+
+# Different cases where properties are added
+@testset "properties" begin
+    include("test_properties.jl")
+end
