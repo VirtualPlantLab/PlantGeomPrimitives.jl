@@ -1,7 +1,7 @@
 ### This file contains public API ###
 
 # Convert to format used in GeometryBasics
-function GLMesh(m::Mesh{VT}) where {VT<:Vec{FT}} where {FT<:AbstractFloat}
+function GLMesh(m::Mesh{FT}) where {FT<:AbstractFloat}
     verts = convert(Vector{GeometryBasics.Point{3,FT}}, vertices(m))
     facs = [GeometryBasics.TriangleFace{Int}(i, i+1, i+2) for i in 1:3:length(vertices(m))]
     m = GeometryBasics.Mesh(verts, facs)
@@ -71,9 +71,7 @@ be passed as symnols.
 ```julia
 julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
 
-julia> n = [Vec(0.0, 0.0, 1.0)];
-
-julia> mesh = Mesh(v, n);
+julia> mesh = Mesh(v);
 
 julia> save_mesh(mesh, fileformat = :STL_BINARY, filename = "path/to/mesh.bstl");
 ```

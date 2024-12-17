@@ -63,16 +63,16 @@ end
 end
 
 # Make sure normals are correct
-@testset "scenes" begin
+@testset "normals" begin
     include("check_normals.jl")
-end
-
-# Scenes
-@testset "scenes" begin
-    include("test_scene.jl")
 end
 
 # Mesh I/O
 @testset "mesh_io" begin
     include("test_meshio.jl")
+end
+
+# Different cases where properties are added
+@testset "properties" begin
+    include("test_properties.jl")
 end

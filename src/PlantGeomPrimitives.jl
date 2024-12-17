@@ -7,15 +7,15 @@ import FileIO, MeshIO
 import LinearAlgebra as L
 import CoordinateTransformations as CT
 import Rotations
-import ColorTypes
 
-export area, areas, Mesh, Scene, add!, Material, ntriangles, nvertices, materials, colors,
-       mesh, nvertices, vertices, normals, load_mesh, save_mesh, scale!, rotatex!,
+export area, areas, Mesh, ntriangles, nvertices, vertices, normals,
+       load_mesh, save_mesh, scale!, rotatex!,
        rotatey!, rotatez!, rotate!, translate!, Vec, O, X, Y, Z, Triangle, Rectangle,
        Trapezoid, SolidCube, HollowCube, BBox, Ellipse, HollowCylinder, SolidCylinder,
        HollowCone, SolidCone, HollowFrustum, SolidFrustum, Ellipsoid, Triangle!, Rectangle!,
        Trapezoid!, SolidCube!, Ellipse!, HollowCube!, HollowCylinder!, SolidCylinder!,
-       HollowCone!, SolidCone!, HollowFrustum!, SolidFrustum!, get_triangle
+       HollowCone!, SolidCone!, HollowFrustum!, SolidFrustum!, get_triangle,
+       properties, add_property!, add!
 
 abstract type Material end
 
@@ -148,9 +148,6 @@ end
 include("Mesh/Mesh.jl")
 include("Mesh/MeshIO.jl")
 include("Mesh/Transformations.jl")
-
-# Scene object
-include("Scene.jl")
 
 # Primitive constructors
 include("Primitives/BBox.jl")
