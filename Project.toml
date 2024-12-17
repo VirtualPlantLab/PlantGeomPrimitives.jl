@@ -1,7 +1,7 @@
 name = "PlantGeomPrimitives"
 uuid = "7eef3cc5-4580-4ff0-8f6f-933507db6664"
 authors = ["Alejandro Morales Sierra <alejandro.moralessierra@wur.nl> and contributors"]
-version = "0.0.4"
+version = "0.0.5"
 
 [deps]
 CoordinateTransformations = "150eb455-5306-5404-9cee-2592286d6298"
