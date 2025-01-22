@@ -25,4 +25,12 @@ eltype(PGP.properties(r)[:prop]) == Union{D.bar, D.foo}
 PGP.add!(r, t, prop = D.oomp())
 eltype(PGP.properties(r)[:prop]) == Union{D.bar, D.foo, D.oomp}
 
+
+# Merging properties of two meshes
+PGP.add_property!(e, :prop, D.foo())
+PGP.add_property!(t, :prop, D.bar())
+m = PGP.Mesh([t, e])
+eltype(PGP.properties(m)[:prop]) == Union{D.bar, D.foo}
+
+
 end

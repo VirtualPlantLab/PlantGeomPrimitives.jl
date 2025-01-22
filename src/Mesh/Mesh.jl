@@ -124,11 +124,26 @@ function add_properties!(p1::Dict{Symbol, AbstractVector}, p2::Dict{Symbol, Abst
     # If not, they must have the same properties
     k1, k2 = (keys(p1), keys(p2))
     @assert k1 == k2 "Properties of both meshes must be the same"
-    # Add properties (we assume each property is stored in an array-like structure)
+    # Transfer properties
     for k in k1
-        @inbounds append!(p1[k], p2[k])
+        add_property!(p1, k, p2[k])
     end
     return p1
+end
+
+# Add a new property to an existing dictionary of properties
+# If the types are different, create union that contains all types
+function add_property!(p::Dict{Symbol, AbstractVector}, prop::Symbol, data::AbstractVector)
+    etype1 = eltype(p[prop])
+    etype2 = eltype(data)
+    if etype2 isa etype1
+        append!(p[prop], data)
+    else
+        etype3 = Union{etype1, etype2}
+        p[prop] = convert(Vector{etype3}, p[prop])
+        append!(p[prop], data)
+    end
+    return p
 end
 
 """
@@ -162,18 +177,9 @@ function add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
     # Create new property if the one being added does not exist
     if !haskey(properties(m), prop)
         properties(m)[prop] = vecdata
-    # Otherwise append the data to the existing property creating an union type if necessary
-    # when the type of `data` does not inherit from the type of the existing property
+    # Otherwise add to existing property
     else
-        etype1 = eltype(properties(m)[prop])
-        etype2 = eltype(vecdata)
-        if etype2 isa etype1
-            append!(properties(m)[prop], vecdata)
-        else
-            etype3 = Union{etype1, etype2}
-            properties(m)[prop] = convert(Vector{etype3}, properties(m)[prop])
-            append!(properties(m)[prop], vecdata)
-        end
+        add_property!(properties(m), prop, vecdata)
     end
     return m
 end
