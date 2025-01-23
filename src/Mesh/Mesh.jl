@@ -174,9 +174,9 @@ julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
 function add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
     # Check if the data is an array and if not convert it to an array with length nt
     vecdata = data isa AbstractVector ? data : fill(data, nt)
-    # Create new property if the one being added does not exist
+    # Create new property if the one being added does not exist (make sure to copy)
     if !haskey(properties(m), prop)
-        properties(m)[prop] = vecdata
+        properties(m)[prop] = copy(vecdata)
     # Otherwise add to existing property
     else
         add_property!(properties(m), prop, vecdata)
@@ -207,7 +207,7 @@ julia> m = Mesh([e,r]);
 function Mesh(meshes::Vector{<:Mesh})
     @assert !isempty(meshes) "At least one mesh must be provided"
     @inbounds verts = copy(vertices(meshes[1]))
-    @inbounds props = properties(meshes[1])
+    @inbounds props = copy(properties(meshes[1]))
     if length(meshes) > 1
         @inbounds for i in 2:length(meshes)
             append!(verts, vertices(meshes[i]))
