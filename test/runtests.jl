@@ -64,7 +64,17 @@ end
 
 # Make sure normals are correct
 @testset "normals" begin
-    include("check_normals.jl")
+    include("test_normals.jl")
+end
+
+# Test the creation of edges
+@testset "edges" begin
+    include("test_edges.jl")
+end
+
+# Test the slicing of meshes
+@testset "slicer" begin
+    include("test_slicer.jl")
 end
 
 # Mesh I/O

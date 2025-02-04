@@ -14,12 +14,12 @@ A struct representing a 3D mesh. Every three vertices represents a triangle. Pro
 ```jldoctest
 julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
 
-julia> p = Dict{Symbol, AbstractVector}(:normal => [Vec(0.0, 0.0, 1.0)]);
+julia> p = Dict{Symbol, AbstractVector}(:normals => [Vec(0.0, 0.0, 1.0)]);
 
 julia> m = Mesh(v, p);
 ```
 """
-struct Mesh{FT}
+mutable struct Mesh{FT}
     vertices::Vector{Vec{FT}}
     properties::Dict{Symbol, AbstractVector}
 end
@@ -86,10 +86,8 @@ function Mesh(nt::Number, ::Type{FT} = Float64) where {FT<:AbstractFloat}
     sizehint!(v, nv)
     n = Vec{FT}[]
     sizehint!(n, nt)
-    Mesh(v, Dict{Symbol, AbstractVector}(:normal => n))
+    Mesh(v, Dict{Symbol, AbstractVector}(:normals => n))
 end
-
-
 
 """
     Mesh(vertices)
@@ -116,73 +114,6 @@ function Mesh(vertices::Vector{<:Vec})
     return m
 end
 
-
-# Auxilliary function to add properties (from p2 to p1)
-function add_properties!(p1::Dict{Symbol, AbstractVector}, p2::Dict{Symbol, AbstractVector})
-    # Both are empty
-    isempty(p1) && isempty(p2) && (return nothing)
-    # If not, they must have the same properties
-    k1, k2 = (keys(p1), keys(p2))
-    @assert k1 == k2 "Properties of both meshes must be the same"
-    # Transfer properties
-    for k in k1
-        add_property!(p1, k, p2[k])
-    end
-    return p1
-end
-
-# Add a new property to an existing dictionary of properties
-# If the types are different, create union that contains all types
-function add_property!(p::Dict{Symbol, AbstractVector}, prop::Symbol, data::AbstractVector)
-    etype1 = eltype(p[prop])
-    etype2 = eltype(data)
-    if etype2 isa etype1
-        append!(p[prop], data)
-    else
-        etype3 = Union{etype1, etype2}
-        p[prop] = convert(Vector{etype3}, p[prop])
-        append!(p[prop], data)
-    end
-    return p
-end
-
-"""
-    add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
-
-Add a property to a mesh. The property is identified by a name (`prop`) and is stored as an
-array of values (`data`), one per triangle. If the property already exists, the new data is
-appended to the existing property, otherwise a new property is created. It is possible to
-pass a single object for `data`, in which case the property will be set to the same value for
-all triangles.
-
-# Arguments
-- `mesh`: The mesh to which the property is to be added.
-- `prop`: The name of the property to be added as a `Symbol`.
-- `data`: The data to be added to the property (an array or a single value).
-- `nt`: The number of triangles to be assumed if `data` is not an array. By default this is the number of triangles in the mesh.
-
-# Returns
-The mesh with updated properties.
-
-# Example
-```jldoctest
-julia> r = Rectangle();
-
-julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
-```
-"""
-function add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
-    # Check if the data is an array and if not convert it to an array with length nt
-    vecdata = data isa AbstractVector ? data : fill(data, nt)
-    # Create new property if the one being added does not exist (make sure to copy)
-    if !haskey(properties(m), prop)
-        properties(m)[prop] = copy(vecdata)
-    # Otherwise add to existing property
-    else
-        add_property!(properties(m), prop, vecdata)
-    end
-    return m
-end
 
 """
     Mesh(meshes)
@@ -217,32 +148,48 @@ function Mesh(meshes::Vector{<:Mesh})
     Mesh(verts, props)
 end
 
-# Calculate the normals of a mesh and add them (deals with partially compute normals)
-function update_normals!(m::Mesh{FT}) where {FT<:AbstractFloat}
-    # 1. Check if there is a property called :normal and if not create it
-    if !haskey(properties(m), :normal)
-        properties(m)[:normal] = Vec{FT}[]
+
+"""
+    add!(mesh1, mesh2; kwargs...)
+
+Manually add a mesh to an existing mesh with optional properties captured as keywords. Make
+sure to be consistent with the properties (both meshes should end up with the same lsit of
+properties). For example, if the scene was created with `:colors``, then you should provide
+`:colors`` for the new mesh as well.
+
+# Arguments
+- `mesh1`: The current mesh we want to extend.
+- `mesh1`: A new mesh we want to add.
+- `kwargs`: Properties to be set per triangle in the new mesh.
+
+# Example
+```jldoctest
+julia> t1 = Triangle(length = 1.0, width = 1.0);
+
+julia> using ColorTypes: RGB
+
+julia> add_property!(t1, :colors, rand(RGB));
+
+julia> t2 = Rectangle(length = 5.0, width = 0.5);
+
+julia> add!(t1, t2, colors = rand(RGB));
+```
+"""
+function add!(mesh1, mesh2; kwargs...)
+    # Make sure the mesh contains normals
+    update_normals!(mesh2)
+    # Add the vertices and normals
+    append!(vertices(mesh1), vertices(mesh2))
+    add_property!(mesh1, :normals, normals(mesh2))
+    # Set optional properties per triangle
+    for (k, v) in kwargs
+        add_property!(mesh1, k, v, ntriangles(mesh2))
     end
-    vs = vertices(m)
-    lv = length(vs)
-    # 2. If the property :normal is empty, compute the normals for all vertices
-    if isempty(normals(m))
-        for i in 1:3:lv
-            @inbounds v1, v2, v3 = vs[i], vs[i+1], vs[i+2]
-            n = L.normalize(L.cross(v2 .- v1, v3 .- v1))
-            push!(normals(m), n)
-        end
-    else
-    # 3. If the property :normal is not empty, compute the normals for the remaining vertices
-        ln = length(normals(m))
-        for i in 3ln:3:(lv - 3)
-            @inbounds v1, v2, v3 = vs[i + 1], vs[i + 2], vs[i + 3]
-            n = L.normalize(L.cross(v2 .- v1, v3 .- v1))
-            push!(normals(m), n)
-        end
-    end
-    return nothing
+    return mesh1
 end
+
+
+# Types and size
 
 """
     eltype(mesh::Mesh)
@@ -264,8 +211,6 @@ julia> eltype(m);
 Base.eltype(m::Mesh{VT}) where VT = eltype(VT)
 Base.eltype(::Type{Mesh{VT}}) where VT = eltype(VT)
 
-
-# Accessor functions
 """
     ntriangles(mesh)
 
@@ -334,28 +279,6 @@ julia> vertices(m);
 vertices(mesh::Mesh) = mesh.vertices
 
 """
-    normals(mesh::Mesh)
-
-Retrieve the normals of a mesh.
-
-# Arguments
-- `mesh`: The mesh from which to retrieve the normals.
-
-# Returns
-A vector containing the normals of the mesh.
-
-# Example
-```jldoctest; output=false
-julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
-
-julia> m = Mesh(v);
-
-julia> normals(m);
-```
-"""
-normals(mesh::Mesh) = properties(mesh)[:normal]
-
-"""
     properties(mesh::Mesh)
 
 Retrieve the properties of a mesh. Properties are stored as a dictionary with one entry per
@@ -412,62 +335,7 @@ function get_triangle(v::AbstractVector, i)
     @view v[SVector{3,Int}(i1, i1+1, i1+2)]
 end
 
-# Area of a triangle given its vertices
-function area_triangle(v1::Vec{FT}, v2::Vec{FT}, v3::Vec{FT})::FT where {FT<:AbstractFloat}
-    e1 = v2 .- v1
-    e2 = v3 .- v1
-    FT(0.5) * L.norm(L.cross(e1, e2))
-end
-
-"""
-    area(mesh::Mesh)
-
-Total surface area of a mesh (as the sum of areas of individual triangles).
-
-# Arguments
-- `mesh`: Mesh which area is to be calculated.
-
-# Returns
-The total surface area of the mesh as a number.
-
-# Example
-```jldoctest
-julia> r = Rectangle(length = 10.0, width = 0.2);
-
-julia> area(r);
-
-julia> r = Rectangle(length = 10f0, width = 0.2f0);
-
-julia> area(r);
-```
-"""
-function area(m::Mesh)
-    sum(area_triangle(get_triangle(m, i)...) for i in 1:ntriangles(m))
-end
-
-"""
-    areas(m::Mesh)
-
-A vector with the areas of the different triangles that form a mesh.
-
-# Arguments
-- `mesh`: Mesh which areas are to be calculated.
-
-# Returns
-A vector with the areas of the different triangles that form the mesh.
-
-# Example
-```jldoctest
-julia> r = Rectangle(length = 10.0, width = 0.2);
-
-julia> areas(r);
-
-julia> r = Rectangle(length = 10f0, width = 0.2f0);
-
-julia> areas(r);
-```
-"""
-areas(m::Mesh) = [area_triangle(get_triangle(m, i)...) for i in 1:ntriangles(m)]
+# Comparisons
 
 # Check if two meshes are equal (mostly for testing)
 function Base.:(==)(m1::Mesh, m2::Mesh)
@@ -479,44 +347,4 @@ function Base.isapprox(m1::Mesh, m2::Mesh; atol::Real = 0.0,
                       rtol::Real = atol > 0.0 ? 0.0 : sqrt(eps(1.0)))
     isapprox(vertices(m1), vertices(m2), atol = atol, rtol = rtol) &&
         isapprox(normals(m1), normals(m2), atol = atol, rtol = rtol)
-end
-
-
-"""
-    add!(mesh1, mesh2; kwargs...)
-
-Manually add a mesh to an existing mesh with optional properties captured as keywords. Make
-sure to be consistent with the properties (both meshes should end up with the same lsit of
-properties). For example, if the scene was created with `:colors``, then you should provide
-`:colors`` for the new mesh as well.
-
-# Arguments
-- `mesh1`: The current mesh we want to extend.
-- `mesh1`: A new mesh we want to add.
-- `kwargs`: Properties to be set per triangle in the new mesh.
-
-# Example
-```jldoctest
-julia> t1 = Triangle(length = 1.0, width = 1.0);
-
-julia> using ColorTypes: RGB
-
-julia> add_property!(t1, :colors, rand(RGB));
-
-julia> t2 = Rectangle(length = 5.0, width = 0.5);
-
-julia> add!(t1, t2, colors = rand(RGB));
-```
-"""
-function add!(mesh1, mesh2; kwargs...)
-    # Make sure the mesh contains normals
-    update_normals!(mesh2)
-    # Add the vertices and normals
-    append!(vertices(mesh1), vertices(mesh2))
-    add_property!(mesh1, :normal, normals(mesh2))
-    # Set optional properties per triangle
-    for (k, v) in kwargs
-        add_property!(mesh1, k, v, ntriangles(mesh2))
-    end
-    return mesh1
 end

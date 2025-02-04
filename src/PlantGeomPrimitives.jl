@@ -1,14 +1,14 @@
 module PlantGeomPrimitives
 
 import StaticArrays: SVector, SMatrix
-import GeometryBasics
+import GeometryBasics as GB
 import Base
 import FileIO, MeshIO
 import LinearAlgebra as L
 import CoordinateTransformations as CT
 import Rotations
 
-export area, areas, Mesh, ntriangles, nvertices, vertices, normals,
+export area, areas, Mesh, ntriangles, nvertices, vertices, normals, edges,
        load_mesh, save_mesh, scale!, rotatex!,
        rotatey!, rotatez!, rotate!, translate!, Vec, O, X, Y, Z, Triangle, Rectangle,
        Trapezoid, SolidCube, HollowCube, BBox, Ellipse, HollowCylinder, SolidCylinder,
@@ -146,6 +146,11 @@ end
 
 # Triangular meshes
 include("Mesh/Mesh.jl")
+include("Mesh/Properties.jl")
+include("Mesh/Normals.jl")
+include("Mesh/Edges.jl")
+include("Mesh/Areas.jl")
+include("Mesh/Slicer.jl")
 include("Mesh/MeshIO.jl")
 include("Mesh/Transformations.jl")
 
