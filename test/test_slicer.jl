@@ -21,6 +21,6 @@ r2 = deepcopy(r)
 # Heights of intersection
 Ycuts = collect(-1:0.25:1)
 Zcuts = collect(0:0.25:2)
-G.slice!(r2, planes = (X = (), Y = Ycuts, Z = Zcuts))
+G.slice!(r2, Y = Ycuts, Z = Zcuts)
 
 end
