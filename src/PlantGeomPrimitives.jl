@@ -15,7 +15,7 @@ export area, areas, Mesh, ntriangles, nvertices, vertices, normals, edges,
        HollowCone, SolidCone, HollowFrustum, SolidFrustum, Ellipsoid, Triangle!, Rectangle!,
        Trapezoid!, SolidCube!, Ellipse!, HollowCube!, HollowCylinder!, SolidCylinder!,
        HollowCone!, SolidCone!, HollowFrustum!, SolidFrustum!, get_triangle,
-       properties, add_property!, add!, slice!
+       properties, add_property!, add!, slice!, slices
 
 abstract type Material end
 
