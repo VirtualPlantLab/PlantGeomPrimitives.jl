@@ -257,3 +257,25 @@ function two_intersection_points(i, h, vi, es, vs)
         return p1, p2
     end
 end
+
+"""
+    slices(mesh::Mesh)
+
+Retrieve the indices indicating the slices to which each triangle in the mesh belongs to.
+
+# Arguments
+- `mesh`: The mesh from which to retrieve the slices.
+
+# Returns
+A vector containing the slice indices of the triangles in the mesh.
+
+# Example
+```jldoctest; output=false
+julia> mesh = Rectangle(length = 1.0, width = 1.0);
+
+julia> slice!(mesh, Y = collect(-0.25:0.25:0.5), Z = collect(0.25:0.25:1));
+
+julia> slices(mesh);
+```
+"""
+slices(mesh::Mesh) = properties(mesh)[:slices]
