@@ -1,28 +1,14 @@
 ### This file contains public API ###
 
 """
-    Mesh
+    Mesh{FT}
 
-A struct representing a 3D mesh. Every three vertices represents a triangle. Properties per
-    triangle are stored in a dictionary of arrays.
-
-# Fields
-- `vertices`: A vector containing the vertices of the mesh.
-- `properties`: A dictionary containing additional properties of the mesh (arrays of properties per triangle).
-
-# Example
-```jldoctest
-julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
-
-julia> p = Dict{Symbol, AbstractVector}(:normals => [Vec(0.0, 0.0, 1.0)]);
-
-julia> m = Mesh(v, p);
+A struct representing a 3D mesh using floating-point precision `FT`. Equivalent to `Geom{3,FT}`.
+See help on `Geom{n,FT}` for details.
 ```
 """
-mutable struct Mesh{FT}
-    vertices::Vector{Vec{FT}}
-    properties::Dict{Symbol, AbstractVector}
-end
+const Mesh{FT} = Geom{3,FT}
+
 
 """
     Mesh(type = Float64)
@@ -36,7 +22,7 @@ corresponding data type as in `Mesh(Float32)`.
 - `type`: The floating-point precision type for the mesh data (default is `Float64`).
 
 # Returns
-A `Mesh` object with no vertices or normals.
+A `Mesh` object with no vertices.
 
 # Example
 ```jldoctest
@@ -50,7 +36,7 @@ julia> Mesh(Float32);
 ```
 """
 function Mesh(::Type{FT} = Float64) where {FT<:AbstractFloat}
-    Mesh(Vec{FT}[], Dict{Symbol, AbstractVector}())
+    Geom(Val(3), FT)
 end
 
 """
@@ -60,14 +46,14 @@ Generate a triangular dense mesh with enough memory allocated to store `nt`
 triangles. The behaviour is equivalent to generating an empty
 mesh but may be computationally more efficient when appending a large number of
 primitives. If a lower floating precision is required, this may be specified
-as an optional third argument as in `Mesh(10, Float32)`.
+as an optional second argument as in `Mesh(10, Float32)`.
 
 # Arguments
 - `nt`: The number of triangles to allocate memory for.
 - `type`: The floating-point precision type for the mesh data (default is `Float64`).
 
 # Returns
-A `Mesh` object with no vertices or normals.
+A `Mesh` object with no vertices.
 
 # Example
 ```jldoctest
@@ -81,12 +67,7 @@ julia> Mesh(1_000, Float32);
 ```
 """
 function Mesh(nt::Number, ::Type{FT} = Float64) where {FT<:AbstractFloat}
-    nv = 3nt
-    v = Vec{FT}[]
-    sizehint!(v, nv)
-    n = Vec{FT}[]
-    sizehint!(n, nt)
-    Mesh(v, Dict{Symbol, AbstractVector}(:normals => n))
+   Geom(nt, Val(3), FT)
 end
 
 """
@@ -107,12 +88,7 @@ julia> verts = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
 julia> Mesh(verts);
 ```
 """
-function Mesh(vertices::Vector{<:Vec})
-    VT = eltype(vertices)
-    m = Mesh(vertices, Dict{Symbol, AbstractVector}())
-    update_normals!(m)
-    return m
-end
+Mesh(vertices::Vector{<:Vec}) = Geom(vertices, Val(3))
 
 
 """
@@ -135,82 +111,11 @@ julia> r = Rectangle(length = 10.0, width = 0.2);
 julia> m = Mesh([e,r]);
 ```
 """
-function Mesh(meshes::Vector{<:Mesh})
-    @assert !isempty(meshes) "At least one mesh must be provided"
-    @inbounds verts = copy(vertices(meshes[1]))
-    @inbounds props = copy(properties(meshes[1]))
-    if length(meshes) > 1
-        @inbounds for i in 2:length(meshes)
-            append!(verts, vertices(meshes[i]))
-            add_properties!(props, properties(meshes[i]))
-        end
-    end
-    Mesh(verts, props)
-end
+Mesh(meshes::Vector{<:Mesh}) = Geom(meshes)
 
-
-"""
-    add!(mesh1, mesh2; kwargs...)
-
-Manually add a mesh to an existing mesh with optional properties captured as keywords. Make
-sure to be consistent with the properties (both meshes should end up with the same lsit of
-properties). For example, if the scene was created with `:colors``, then you should provide
-`:colors`` for the new mesh as well.
-
-# Arguments
-- `mesh1`: The current mesh we want to extend.
-- `mesh1`: A new mesh we want to add.
-- `kwargs`: Properties to be set per triangle in the new mesh.
-
-# Example
-```jldoctest
-julia> t1 = Triangle(length = 1.0, width = 1.0);
-
-julia> using ColorTypes: RGB
-
-julia> add_property!(t1, :colors, rand(RGB));
-
-julia> t2 = Rectangle(length = 5.0, width = 0.5);
-
-julia> add!(t1, t2, colors = rand(RGB));
-```
-"""
-function add!(mesh1, mesh2; kwargs...)
-    # Make sure the mesh contains normals
-    update_normals!(mesh2)
-    # Add the vertices and normals
-    append!(vertices(mesh1), vertices(mesh2))
-    add_property!(mesh1, :normals, normals(mesh2))
-    # Set optional properties per triangle
-    for (k, v) in kwargs
-        add_property!(mesh1, k, v, ntriangles(mesh2))
-    end
-    return mesh1
-end
 
 
 # Types and size
-
-"""
-    eltype(mesh::Mesh)
-
-Extract the the type used to represent coordinates in a mesh (e.g., `Float64`).
-
-# Fields
-- `mesh`: The mesh from which to extract the element type.
-
-# Example
-```jldoctest
-julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
-
-julia> m = Mesh(v);
-
-julia> eltype(m);
-```
-"""
-Base.eltype(m::Mesh{VT}) where VT = eltype(VT)
-Base.eltype(::Type{Mesh{VT}}) where VT = eltype(VT)
-
 """
     ntriangles(mesh)
 
@@ -231,77 +136,10 @@ julia> m = Mesh(v);
 julia> ntriangles(m);
 ```
 """
-ntriangles(mesh::Mesh) = div(length(vertices(mesh)), 3)
+ntriangles(mesh::Mesh) = length(mesh)
 
-"""
-    nvertices(mesh)
-
-The number of vertices in a mesh.
-
-# Arguments
-- `mesh`: The mesh from which to retrieve the number of vertices.
-
-# Returns
-The number of vertices in the mesh as an integer.
-
-# Example
-```jldoctest
-julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
-
-julia> m = Mesh(v);
-
-julia> nvertices(m);
-```
-"""
-nvertices(mesh::Mesh) = length(vertices(mesh))
 
 # Accessor functions
-"""
-    vertices(mesh::Mesh)
-
-Retrieve the vertices of a mesh.
-
-# Arguments
-- `mesh`: The mesh from which to retrieve the vertices.
-
-# Returns
-A vector containing the vertices of the mesh.
-
-# Example
-```jldoctest
-julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
-
-julia> m = Mesh(v);
-
-julia> vertices(m);
-```
-"""
-vertices(mesh::Mesh) = mesh.vertices
-
-"""
-    properties(mesh::Mesh)
-
-Retrieve the properties of a mesh. Properties are stored as a dictionary with one entry per
-type of property. Each property is an array of objects, one per triangle. Each property is
-identified by a symbol (e.g.).
-
-# Arguments
-- `mesh`: The mesh from which to retrieve the normals.
-
-# Returns
-A vector containing the normals of the mesh.
-
-# Example
-```jldoctest; output=false
-julia> r = Rectangle();
-
-julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
-
-julia> properties(r);
-```
-"""
-properties(mesh::Mesh) = mesh.properties
-
 """
     get_triangle(m::Mesh, i)
 
@@ -324,27 +162,4 @@ julia> m = Mesh(v);
 julia> get_triangle(m, 2);
 ```
 """
-function get_triangle(m::Mesh, i)
-    v = vertices(m)
-    get_triangle(v, i)
-end
-
-# Internal function to retrieve the vertices of the i-th triangle (give list of vertices)
-function get_triangle(v::AbstractVector, i)
-    i1 = (i - 1)*3 + 1
-    @view v[SVector{3,Int}(i1, i1+1, i1+2)]
-end
-
-# Comparisons
-
-# Check if two meshes are equal (mostly for testing)
-function Base.:(==)(m1::Mesh, m2::Mesh)
-    vertices(m1) == vertices(m2) && normals(m1) == normals(m2)
-end
-
-# Check if two meshes are approximately equal (mostly for testing)
-function Base.isapprox(m1::Mesh, m2::Mesh; atol::Real = 0.0,
-                      rtol::Real = atol > 0.0 ? 0.0 : sqrt(eps(1.0)))
-    isapprox(vertices(m1), vertices(m2), atol = atol, rtol = rtol) &&
-        isapprox(normals(m1), normals(m2), atol = atol, rtol = rtol)
-end
+get_triangle(m::Mesh, i) = get_geom(m, i)

@@ -29,16 +29,3 @@ function push_edges!(vs, m, i0)
     push!(edges(m), Vec(e1, e2, e3))
     return nothing
 end
-
-"""
-    edges(mesh::Mesh)
-
-Retrieve the edges of a mesh (three edges per triangle).
-
-# Arguments
-- `mesh`: The mesh from which to retrieve the edges.
-
-# Returns
-A vector containing the edges of the mesh.
-"""
-edges(mesh::Mesh) = properties(mesh)[:edges]

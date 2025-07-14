@@ -2,24 +2,26 @@
 
 # Rotations, translations and scaling of triangular meshes
 
-# In-place affine transformation of a mesh
-function transform!(m::Mesh, trans::CT.AbstractAffineMap)
+# In-place affine transformation of a geometry
+function transform!(m::Geom, trans::CT.AbstractAffineMap)
     vertices(m) .= trans.(vertices(m))
     norm_trans   = transpose(inv(trans.linear))
-    @simd for i in eachindex(normals(m))
-        @inbounds normals(m)[i] = L.normalize(norm_trans*normals(m)[i])
+    if has_normals(m)
+        @simd for i in eachindex(normals(m))
+            @inbounds normals(m)[i] = L.normalize(norm_trans*normals(m)[i])
+        end
     end
     return nothing
 end
 
 
 """
-    scale!(m::Mesh, vec::Vec)
+    scale!(g::Geom, vec::Vec)
 
-Scale a mesh `m` along the three axes provided by `vec`.
+Scale a geom `g` along the three axes provided by `vec`.
 
 # Arguments
-- `m`: The mesh to be scaled.
+- `g`: The geometry to be scaled (`Points`, `Segments` or `Mesh`).
 - `vec`: A vector containing the scaling factors for the x, y, and z axes.
 
 # Examples
@@ -31,18 +33,18 @@ julia> scaling_vector = Vec(2.0, 1.5, 3.0);
 julia> scale!(m, scaling_vector);
 ```
 """
-function scale!(m::Mesh, vec::Vec)
+function scale!(g::Geom, vec::Vec)
     trans = CT.LinearMap(CT.SDiagonal(vec...))
-    transform!(m, trans)
+    transform!(g, trans)
 end
 
 """
-    rotatex!(m::Mesh, θ)
+    rotatex!(g::Geom, θ)
 
-Rotate a mesh `m` around the x axis by angle `θ`.
+Rotate a geometry `g` around the x axis by angle `θ`.
 
 # Arguments
-- `m`: The mesh to be scaled.
+- `g`: The geometry to be rotated.
 - `θ`: Angle of rotation in radians.
 
 # Examples
@@ -54,18 +56,18 @@ julia> θ = pi/2;
 julia> rotatex!(m, θ)
 ```
 """
-function rotatex!(m::Mesh, θ)
+function rotatex!(g::Geom, θ)
     trans = CT.LinearMap(Rotations.RotX(θ))
-    transform!(m, trans)
+    transform!(g, trans)
 end
 
 """
-    rotatey!(m::Mesh, θ)
+    rotatey!(g::Geom, θ)
 
-Rotate a mesh `m` around the y axis by angle `θ`.
+Rotate a geometry `g` around the y axis by angle `θ`.
 
 # Arguments
-- `m`: The mesh to be scaled.
+- `g`: The geometry to be rotated.
 - `θ`: Angle of rotation in radians.
 
 # Examples
@@ -77,18 +79,18 @@ julia> θ = pi/2;
 julia> rotatey!(m, θ);
 ```
 """
-function rotatey!(m::Mesh, θ)
+function rotatey!(g::Geom, θ)
     trans = CT.LinearMap(Rotations.RotY(θ))
-    transform!(m, trans)
+    transform!(g, trans)
 end
 
 """
-    rotatez!(m::Mesh, θ)
+    rotatez!(g::Geom, θ)
 
-Rotate a mesh `m` around the z axis by angle `θ`.
+Rotate a geometry `g` around the z axis by angle `θ`.
 
 # Arguments
-- `m`: The mesh to be scaled.
+- `g`: The geometry to be rotated.
 - `θ`: Angle of rotation in radians.
 
 # Examples
@@ -100,29 +102,29 @@ julia> θ = pi/2;
 julia> rotatez!(m, θ);
 ```
 """
-function rotatez!(m::Mesh, θ)
+function rotatez!(g::Geom, θ)
     trans = CT.LinearMap(Rotations.RotZ(θ))
-    transform!(m, trans)
+    transform!(g, trans)
 end
 
 """
-    rotate!(m::Mesh; x::Vec, y::Vec, z::Vec)
+    rotate!(g::Geom; x::Vec, y::Vec, z::Vec)
 
-Rotate a mesh `m` to a new coordinate system given by `x`, `y` and `z`
+Rotate a geometry `g` to a new coordinate system given by `x`, `y` and `z`
 """
-function rotate!(m::Mesh; x::Vec{FT}, y::Vec{FT}, z::Vec{FT}) where {FT}
+function rotate!(g::Geom; x::Vec{FT}, y::Vec{FT}, z::Vec{FT}) where {FT}
     @inbounds mat = SMatrix{3,3,FT}(x[1], x[2], x[3], y[1], y[2], y[3], z[1], z[2], z[3])
     trans = CT.LinearMap(mat)
-    transform!(m, trans)
+    transform!(g, trans)
 end
 
 """
-    translate!(m::Mesh, v::Vec)
+    translate!(g::Geom, v::Vec)
 
-Translate the mesh `m` by vector `v`.
+Translate the geometry `g` by vector `v`.
 
 # Arguments
-- `m`: The mesh to be translated.
+- `g`: The geometry to be translated.
 - `v`: The vector by which the mesh is to be translated.
 
 # Examples
@@ -134,8 +136,8 @@ julia> v = Vec(2.0, 1.5, 3.0);
 julia> translate!(m, v);
 ```
 """
-function translate!(m::Mesh, v::Vec)
+function translate!(g::Geom, v::Vec)
     trans = CT.Translation(v)
-    vertices(m) .= trans.(vertices(m))
+    vertices(g) .= trans.(vertices(g))
     return nothing
 end

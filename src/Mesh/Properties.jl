@@ -1,66 +1,227 @@
-# Auxilliary function to add properties (from p2 to p1)
-function add_properties!(p1::Dict{Symbol, AbstractVector}, p2::Dict{Symbol, AbstractVector})
-    # Both are empty
-    isempty(p1) && isempty(p2) && (return nothing)
-    # If not, they must have the same properties
-    k1, k2 = (keys(p1), keys(p2))
-    @assert k1 == k2 "Properties of both meshes must be the same"
-    # Transfer properties
-    for k in k1
-        add_property!(p1, k, p2[k])
+
+################################### NORMALS ################################################
+
+# TODO: Write documentation for calculate_normals!()
+function calculate_normals!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    vs = vertices(m)
+    lv = length(vs)
+    output = Vec{FT}[]
+    for i in 1:3:lv
+        @inbounds v1, v2, v3 = vs[i], vs[i+1], vs[i+2]
+        n = L.normalize(L.cross(v2 .- v1, v3 .- v1))
+        push!(output, n)
     end
-    return p1
+    return output
 end
 
-# Add a new property to an existing dictionary of properties
-# If the types are different, create union that contains all types
-function add_property!(p::Dict{Symbol, AbstractVector}, prop::Symbol, data::AbstractVector)
-    etype1 = eltype(p[prop])
-    etype2 = eltype(data)
-    if etype2 isa etype1
-        append!(p[prop], data)
-    else
-        etype3 = Union{etype1, etype2}
-        p[prop] = convert(Vector{etype3}, p[prop])
-        append!(p[prop], data)
+# TODO: Write documentation for update_normals!()
+function update_normals!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    # 1. Check if there is a property called :normals and if not create it
+    if !haskey(properties(m), :normals)
+        properties(m)[:normals] = Vec{FT}[]
     end
-    return p
+    vs = vertices(m)
+    lv = length(vs)
+    # 2. If the property :normals is empty, compute the normals for all vertices
+    if isempty(normals(m))
+        for i in 1:3:lv
+            @inbounds v1, v2, v3 = vs[i], vs[i+1], vs[i+2]
+            n = L.normalize(L.cross(v2 .- v1, v3 .- v1))
+            push!(normals(m), n)
+        end
+    else
+    # 3. If the property :normals is not empty, compute the normals for the remaining vertices
+        ln = length(normals(m))
+        for i in 3ln:3:(lv - 3)
+            @inbounds v1, v2, v3 = vs[i + 1], vs[i + 2], vs[i + 3]
+            n = L.normalize(L.cross(v2 .- v1, v3 .- v1))
+            push!(normals(m), n)
+        end
+    end
+    return nothing
 end
 
-"""
-    add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
+##################################### AREAS ################################################
 
-Add a property to a mesh. The property is identified by a name (`prop`) and is stored as an
-array of values (`data`), one per triangle. If the property already exists, the new data is
-appended to the existing property, otherwise a new property is created. It is possible to
-pass a single object for `data`, in which case the property will be set to the same value for
-all triangles.
+# Area of a triangle given its vertices
+function area_triangle(v1::Vec{FT}, v2::Vec{FT}, v3::Vec{FT})::FT where {FT<:AbstractFloat}
+    e1 = v2 .- v1
+    e2 = v3 .- v1
+    FT(0.5) * L.norm(L.cross(e1, e2))
+end
 
-# Arguments
-- `mesh`: The mesh to which the property is to be added.
-- `prop`: The name of the property to be added as a `Symbol`.
-- `data`: The data to be added to the property (an array or a single value).
-- `nt`: The number of triangles to be assumed if `data` is not an array. By default this is the number of triangles in the mesh.
-
-# Returns
-The mesh with updated properties.
-
-# Example
-```jldoctest
-julia> r = Rectangle();
-
-julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
-```
-"""
-function add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))
-    # Check if the data is an array and if not convert it to an array with length nt
-    vecdata = data isa AbstractVector ? data : fill(data, nt)
-    # Create new property if the one being added does not exist (make sure to copy)
-    if !haskey(properties(m), prop)
-        properties(m)[prop] = copy(vecdata)
-    # Otherwise add to existing property
-    else
-        add_property!(properties(m), prop, vecdata)
+# TODO: Write documentation for calculate_areas!()
+function calculate_areas!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    vs = vertices(m)
+    lv = length(vs)
+    output = FT[]
+    for i in 1:3:lv
+        @inbounds v1, v2, v3 = vs[i], vs[i+1], vs[i+2]
+        area = area_triangle(v1, v2, v3)
+        push!(output, area)
     end
-    return m
+    return output
+end
+
+# TODO: Write documentation for update_areas!()
+function update_areas!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    # 1. Check if there is a property called :areas and if not create it
+    if !haskey(properties(m), :areas)
+        properties(m)[:areas] = Vec{FT}[]
+    end
+    vs = vertices(m)
+    lv = length(vs)
+    # 2. If the property :areas is empty, compute the areas for all vertices
+    if isempty(areas(m))
+        for i in 1:3:lv
+            @inbounds v1, v2, v3 = vs[i], vs[i+1], vs[i+2]
+            area = area_triangle(v1, v2, v3)
+            push!(areas(m), area)
+        end
+    else
+    # 3. If the property :areas is not empty, compute the areas for the remaining vertices
+        ln = length(areas(m))
+        for i in 3ln:3:(lv - 3)
+            @inbounds v1, v2, v3 = vs[i + 1], vs[i + 2], vs[i + 3]
+            area = area_triangle(v1, v2, v3)
+            push!(areas(m), area)
+        end
+    end
+    return nothing
+end
+
+
+##################################### EDGES ################################################
+
+# TODO: Write documentation for calculate_edges!()
+function calculate_edges!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    vs = vertices(m)
+    lv = length(vs)
+    output = FT[]
+    for i in 1:3:lv
+        @inbounds v1, v2, v3 = vs[i], vs[i+1], vs[i+2]
+        e1 = L.normalize(v2 .- v1)
+        e2 = L.normalize(v3 .- v1)
+        e3 = L.normalize(v2 .- v3)
+        push!(output, Vec(e1, e2, e3))
+    end
+    return output
+end
+
+# TODO: Write documentation for update_edges!()
+function update_edges!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    # 1. Check if there is a property called :edges and if not create it
+    if !haskey(properties(m), :edges)
+        properties(m)[:edges] = Vec{Vec{FT}}[]
+    end
+    vs = vertices(m)
+    lv = length(vs)
+    # 2. If the property :edges is empty, compute the edges for all vertices
+    if isempty(edges(m))
+        for i in 1:3:lv
+            push_edges!(vs, m, i)
+        end
+    else
+    # 3. If the property :edges is not empty, compute the edges for the remaining vertices
+        ln = length(edges(m))
+        for i in 3ln:3:(lv - 3)
+            push_edges!(vs, m, i + 1)
+        end
+    end
+end
+
+# Create the three edges stored as a vector of vectors
+function push_edges!(vs, m, i0)
+    @inbounds v1, v2, v3 = vs[i0], vs[i0+1], vs[i0+2]
+    e1 = L.normalize(v2 .- v1)
+    e2 = L.normalize(v3 .- v1)
+    e3 = L.normalize(v2 .- v3)
+    push!(edges(m), Vec(e1, e2, e3))
+    return nothing
+end
+
+
+################################## INCLINATION #############################################
+
+# TODO: Write documentation for calculate_inclinations!()
+function calculate_inclinations!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    # We need the normal vectors to compute the angles
+    if has_normals(m) && length(normals(m)) == ntriangles(m)
+        nvec = normals(m)
+    else
+        nvec = calculate_normals(m)
+    end
+    # For each normal vector compute the angel wrt horizontal plane
+    output = FT[]
+    for n in nvec
+        push!(output, acos(n[3]/norm(n)))
+    end
+    return output
+end
+
+# TODO: Write documentation for update_inclinations!()
+# Creates normals as a side effect
+function update_inclinations!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    # 1. Check if there is a property called :inclinations and if not create it
+    if !haskey(properties(m), :inclinations)
+        properties(m)[:inclinations] = Vec{Vec{FT}}[]
+    end
+    # 2. We need the normal vectors to compute the angles
+    update_normals!(m)
+    # 3. If the property :inclinations is empty, compute the inclinations for all vertices
+    if isempty(inclinations(m))
+        for n in normals(m)
+            push!(inclinations(m), acos(n[3]/norm(n)))
+        end
+    else
+    # 4. If the property :inclinations is not empty, compute the inclinations for the remaining vertices (if any)
+        ln = length(inclinations(m))
+        for i in ln:ntriangles(m)
+            n = normals(m)[i]
+            push!(inclinations(m), acos(n[3]/norm(n)))
+        end
+    end
+end
+
+
+################################## ORIENTATION #############################################
+
+# TODO: Write documentation for calculate_orientations!()
+function calculate_orientations!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    # We need the normal vectors to compute the angles
+    if has_normals(m) && length(normals(m)) == ntriangles(m)
+        nvec = normals(m)
+    else
+        nvec = calculate_normals(m)
+    end
+    # For each normal vector compute the angel wrt horizontal plane
+    output = FT[]
+    for n in nvec
+        push!(output, atan(n[2]/n[1]))
+    end
+    return output
+end
+
+# TODO: Write documentation for update_orientations!()
+# Creates normals as a side effect
+function update_orientations!(m::Mesh{FT}) where {FT<:AbstractFloat}
+    # 1. Check if there is a property called :orientations and if not create it
+    if !haskey(properties(m), :orientations)
+        properties(m)[:orientations] = Vec{Vec{FT}}[]
+    end
+    # 2. We need the normal vectors to compute the angles
+    update_normals!(m)
+    # 3. If the property :orientations is empty, compute the orientations for all vertices
+    if isempty(orientations(m))
+        for n in normals(m)
+            push!(orientations(m), atan(n[2]/n[1]))
+        end
+    else
+    # 4. If the property :orientations is not empty, compute the orientations for the remaining vertices (if any)
+        ln = length(orientations(m))
+        for i in ln:ntriangles(m)
+            n = normals(m)[i]
+            push!(orientations(m), atan(n[2]/n[1]))
+        end
+    end
 end

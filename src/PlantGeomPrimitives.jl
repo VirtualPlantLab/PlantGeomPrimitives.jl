@@ -8,14 +8,26 @@ import LinearAlgebra as L
 import CoordinateTransformations as CT
 import Rotations
 
-export area, areas, Mesh, ntriangles, nvertices, vertices, normals, edges,
-       load_mesh, save_mesh, scale!, rotatex!,
-       rotatey!, rotatez!, rotate!, translate!, Vec, O, X, Y, Z, Triangle, Rectangle,
-       Trapezoid, SolidCube, HollowCube, BBox, Ellipse, HollowCylinder, SolidCylinder,
-       HollowCone, SolidCone, HollowFrustum, SolidFrustum, Ellipsoid, Triangle!, Rectangle!,
-       Trapezoid!, SolidCube!, Ellipse!, HollowCube!, HollowCylinder!, SolidCylinder!,
-       HollowCone!, SolidCone!, HollowFrustum!, SolidFrustum!, get_triangle,
-       properties, add_property!, add!, slice!, slices
+export Geom, Points, Segments, Mesh,
+       arity, nvertices, ntriangles, nsegments, npoints,
+       properties, add_property!, add!, delete_property!,
+       areas, has_areas, calculate_areas, update_areas!,
+       volumes, has_volumes, calculate_volumes, update_volumes!,
+       inclinations, has_inclinations, calculate_inclinations, update_inclinations!,
+       orientations, has_orientations, calculate_orientations, update_orientations!,
+       lengths, has_lengths, calculate_lengths, update_lengths!,
+       edges, has_edges, calculate_edges, update_edges!,
+       normals, has_normals, calculate_normals, update_normals!,
+       slices, has_slices,
+       Vec, O, X, Y, Z,
+       scale!, rotatex!, rotatey!, rotatez!, rotate!, translate!,
+       Triangle, Rectangle, Trapezoid, SolidCube, HollowCube, BBox, Ellipse, HollowCylinder,
+       SolidCylinder, HollowCone, SolidCone, HollowFrustum, SolidFrustum, Ellipsoid, Triangle!,
+       Rectangle!, Trapezoid!, SolidCube!, Ellipse!, HollowCube!, HollowCylinder!, SolidCylinder!,
+       HollowCone!, SolidCone!, HollowFrustum!, SolidFrustum!,
+       get_geom, get_triangle, get_segment, get_point, vertices,
+       slice!,
+       load_mesh, save_mesh
 
 abstract type Material end
 
@@ -144,17 +156,21 @@ function X(s::FT) where {FT}
     Vec{FT}(s, 0, 0)
 end
 
-# Triangular meshes
+# Geometry
+include("General/Geom.jl")
+include("General/Properties.jl")
+include("General/Normals.jl")
+include("General/Transformations.jl")
+
+# Mesh
 include("Mesh/Mesh.jl")
-include("Mesh/Properties.jl")
-include("Mesh/Normals.jl")
 include("Mesh/Edges.jl")
 include("Mesh/Areas.jl")
 include("Mesh/Slicer.jl")
 include("Mesh/MeshIO.jl")
-include("Mesh/Transformations.jl")
 
-# Primitive constructors
+
+# Primitive constructors (for triangular meshes)
 include("Primitives/BBox.jl")
 include("Primitives/Generic.jl")
 include("Primitives/Triangle.jl")
@@ -170,6 +186,5 @@ include("Primitives/SolidCone.jl")
 include("Primitives/HollowFrustum.jl")
 include("Primitives/SolidFrustum.jl")
 include("Primitives/Ellipsoid.jl")
-
 
 end
