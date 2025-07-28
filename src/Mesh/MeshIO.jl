@@ -1,6 +1,29 @@
 ### This file contains public API ###
 
 # Convert to format used in GeometryBasics
+"""
+    GLMesh(m::Mesh{FT}) where {FT<:AbstractFloat}
+
+Convert a `Mesh` object to a `GeometryBasics.Mesh` object.
+This is useful for interoperability with the GeometryBasics.jl package.
+
+# Arguments
+- `m`: The mesh to convert, which should be of type `Mesh{FT}` where `FT` is a floating-point type.
+
+# Returns
+A `GeometryBasics.Mesh` object containing the vertices and faces of the mesh.
+
+# Example
+```jldoctest
+julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
+
+julia> m = Mesh(vs);
+
+julia> gl_mesh = GLMesh(m);
+
+julia> typeof(gl_mesh)
+```
+"""
 function GLMesh(m::Mesh{FT}) where {FT<:AbstractFloat}
     verts = convert(Vector{GB.Point{3,FT}}, vertices(m))
     facs = [GB.TriangleFace{Int}(i, i+1, i+2) for i in 1:3:length(vertices(m))]
@@ -8,6 +31,27 @@ function GLMesh(m::Mesh{FT}) where {FT<:AbstractFloat}
 end
 
 # Convert from format used in GeometryBasics
+"""
+    Mesh(m::GB.Mesh)
+
+Convert a `GeometryBasics.Mesh` object to a `Mesh` object.
+This is useful for interoperability with the PlantGeomPrimitives.jl package.
+
+# Arguments
+- `m`: The `GeometryBasics.Mesh` object to convert.
+
+# Returns
+A `Mesh` object containing the vertices of the mesh.
+
+# Example
+```jldoctest
+julia> m = GB.Mesh([GB.Point(0.0, 0.0, 0.0), GB.Point(1.0, 0.0, 0.0), GB.Point(0.0, 1.0, 0.0)], [GB.TriangleFace(1, 2, 3)]);
+
+julia> mesh = Mesh(m);
+
+julia> typeof(mesh)
+```
+"""
 function Mesh(m::GB.Mesh)
     all_verts = convert(Vector{Vec{Float64}}, GB.coordinates(m))
     verts = Vec{Float64}[]

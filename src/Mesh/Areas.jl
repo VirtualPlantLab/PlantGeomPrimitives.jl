@@ -1,4 +1,26 @@
 # Area of a triangle given its vertices
+"""
+    area_triangle(v1::Vec, v2::Vec, v3::Vec)
+
+Calculates the area of a triangle given its vertices.
+
+# Arguments
+- `v1`, `v2`, `v3`: Vertices of the triangle as vectors.
+
+# Returns
+The area of the triangle.
+
+# Example
+```jldoctest
+julia> v1 = Vec(0.0, 0.0, 0.0);
+
+julia> v2 = Vec(1.0, 0.0, 0.0);
+
+julia> v3 = Vec(0.0, 1.0, 0.0);
+
+julia> area_triangle(v1, v2, v3);
+```
+"""
 function area_triangle(v1::Vec{FT}, v2::Vec{FT}, v3::Vec{FT})::FT where {FT<:AbstractFloat}
     e1 = v2 .- v1
     e2 = v3 .- v1

@@ -3,6 +3,30 @@
 # Rotations, translations and scaling of triangular meshes
 
 # In-place affine transformation of a mesh
+"""
+    transform!(m::Mesh, trans::CT.AbstractAffineMap)
+
+In-place affine transfrmation of a mesh `m` using a transformation map `trans`.
+
+# Arguments
+- `m`: The mesh to be transformed.
+- `trans`: The transformation map that defines the affine transformation to be 
+applied to the mesh.
+
+# Returns
+The transformed mesh `m` with updated vertices and normals.
+
+# Example
+```jldoctest
+julia> m = Rectangle();
+
+julia> vec = Vec(1.0, 2.0, 3.0);
+
+julia> trans = CT.LinearMap(CT.SDiagonal(vec...));
+
+julia> transform!(m, trans);
+```
+"""
 function transform!(m::Mesh, trans::CT.AbstractAffineMap)
     vertices(m) .= trans.(vertices(m))
     norm_trans   = transpose(inv(trans.linear))
@@ -11,7 +35,6 @@ function transform!(m::Mesh, trans::CT.AbstractAffineMap)
     end
     return nothing
 end
-
 
 """
     scale!(m::Mesh, vec::Vec)
@@ -108,7 +131,26 @@ end
 """
     rotate!(m::Mesh; x::Vec, y::Vec, z::Vec)
 
-Rotate a mesh `m` to a new coordinate system given by `x`, `y` and `z`
+Rotate a mesh `m` to a new coordinate system given by `x`, `y` and `z`.
+
+# Arguments
+- `m`: The mesh to be rotated.
+- `x`: The new x-axis as a `Vec`.
+- `y`: The new y-axis as a `Vec`.
+- `z`: The new z-axis as a `Vec`.
+
+# Examples
+```jldoctest
+julia> m = Rectangle();
+
+julia> x = Vec(1.0, 0.0, 0.0);
+
+julia> y = Vec(0.0, 1.0, 0.0);
+
+julia> z = Vec(0.0, 0.0, 1.0);
+
+julia> rotate!(m, x = x, y = y, z = z);
+```
 """
 function rotate!(m::Mesh; x::Vec{FT}, y::Vec{FT}, z::Vec{FT}) where {FT}
     @inbounds mat = SMatrix{3,3,FT}(x[1], x[2], x[3], y[1], y[2], y[3], z[1], z[2], z[3])

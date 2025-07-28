@@ -1,4 +1,29 @@
 # Auxilliary function to add properties (from p2 to p1)
+"""
+    function add_properties!(p1::Dict{Symbol, AbstractVector}, p2::Dict{Symbol, AbstractVector})
+
+Merge properties from `p2` into `p1`. Both dictionaries must have the same keys.
+If a key exists in `p2` but not in `p1`, it will be added to `p1`.
+If a key exists in both, the values from `p2` will be appended to the existing values in `p1`.
+
+# Arguments
+- `p1`: The first dictionary of properties to which the second will be added.
+- `p2`: The second dictionary of properties to be merged into the first.
+
+# Returns
+The modified `p1` dictionary with properties from `p2` added.
+
+# Example
+```jldoctest
+julia> p1 = Dict{Symbol, AbstractVector}(:prop1 => [1.0, 2.0], :prop2 => [3.0, 4.0]);
+
+julia> p2 = Dict{Symbol, AbstractVector}(:prop1 => [5.0, 6.0], :prop3 => [7.0, 8.0]);
+
+julia> merged_properties = add_properties!(p1, p2);
+
+julia> merged_properties;
+```
+""" 
 function add_properties!(p1::Dict{Symbol, AbstractVector}, p2::Dict{Symbol, AbstractVector})
     # Both are empty
     isempty(p1) && isempty(p2) && (return nothing)
@@ -14,8 +39,40 @@ end
 
 # Add a new property to an existing dictionary of properties
 # If the types are different, create union that contains all types
+"""
+    add_property!(p::Dict{Symbol, AbstractVector}, prop::Symbol, data::AbstractVector)
+
+Add data to an existing property in a dictionary of properties.
+If the property already exists, the new data is appended to the existing property.
+If the property does not exist, please use `add_properties!` instead.
+
+# Arguments
+- `p`: The dictionary of properties to which the property will be added.
+- `prop`: The name of the property to be added as a `Symbol`, given that `prop` is in `p`.
+- `data`: The data to be added to the property (an array or a single value).
+
+# Returns
+The modified dictionary of properties with the new property added.
+
+# Example
+```jldoctest
+julia> p = Dict{Symbol, AbstractVector}(:prop1 => [1.0, 2.0]);
+
+julia> prop = :prop1;
+
+julia> data = [3.0, 4.0];
+
+julia> add_property!(p, prop, data);
+
+julia> p;
+```
+"""
 function add_property!(p::Dict{Symbol, AbstractVector}, prop::Symbol, data::AbstractVector)
-    etype1 = eltype(p[prop])
+    if haskey(p, prop)
+        etype1 = eltype(p[prop])
+    else
+        error("Property $prop does not exist in the dictionary. Please use `add_properties!` instead.")
+    end
     etype2 = eltype(data)
     if etype2 isa etype1
         append!(p[prop], data)
@@ -50,6 +107,8 @@ The mesh with updated properties.
 julia> r = Rectangle();
 
 julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
+
+julia> properties(r);
 ```
 """
 function add_property!(m::Mesh, prop::Symbol, data, nt = ntriangles(m))

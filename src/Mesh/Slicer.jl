@@ -15,10 +15,16 @@ the mesh that contains the indices of the planes where each triangle lies.
 - `Z`: A tuple or array of Z-coordinates where the mesh should be sliced.
 
 # Example
-```jldoctest
+```jldoctest output=false
+julia> import ColorTypes: RGB
+
 julia> mesh = Rectangle(length = 1.0, width = 1.0);
 
 julia> slice!(mesh, Y = collect(-0.25:0.25:0.5), Z = collect(0.25:0.25:1));
+
+julia> add_property!(mesh, :colors, rand(RGB));
+
+julia> render(mesh, wireframe = true);
 ```
 """
 function slice!(mesh::Mesh; X = (), Y = (), Z = ())
@@ -95,11 +101,36 @@ function slice!(mesh::Mesh; X = (), Y = (), Z = ())
     return mesh
 end
 
-# Calculate how many interesection points there are between the plane and the triangle
-# and return the vertex index that is relevant to compute the intersection (depends on how
-# many intersection points there are). When a triangle is not intersected we return the index
-# of the voxel or layer where the triangle lies. When there is an intersection we return -1
-# as the voxel indexing will be determined in the intersection function.
+"""
+    check_intersection(m::Mesh, t::Integer, i::Integer, h::Real, j::Integer)
+
+Calculate how many intersection points there are between the plane and the triangle
+and return the vertex index that is relevant to compute the intersection (depends on how
+many intersection points there are). When a triangle is not intersected we return the index
+of the voxel or layer where the triangle lies. When there is an intersection we return -1
+as the voxel indexing will be determined in the intersection function.
+
+# Arguments
+- `m`: The mesh containing the triangle to be checked.
+- `t`: The index of the triangle in the mesh.
+- `i`: The index of the axis (1 for X, 2 for Y, 3 for Z).
+- `h`: The height of the plane along the specified axis.
+- `j`: The index of the plane in the specified axis.
+
+# Returns
+A tuple containing:
+- The number of intersection points (0, 1, or 2).
+- The index of the vertex that is relevant for the intersection (1, 2, or 3).
+- The slice index (0 if not applicable).
+- The signs of the distances to the plane for each vertex.
+
+# Example
+```jldoctest
+julia> m = Rectangle(length = 1.0, width = 1.0);
+
+julia> check_intersection(m, 1, 2, 0.5, 1);
+```
+"""
 function check_intersection(m::Mesh, t::Integer, i::Integer, h::Real, j::Integer)
     @inbounds begin
         # Extract coordinates in the right axes
@@ -154,19 +185,66 @@ function check_intersection(m::Mesh, t::Integer, i::Integer, h::Real, j::Integer
         end
         # If no distances are close to zero, there are two intersections in the edges that share
         # the vertex with a different sign
-        d = sum(s) > 0 ? -1 : 1 # Sign of the vertex that would be different
+        d = sum(0) > 0 ? -1 : 1 # Sign of the vertex that would be different
         s[1] == d && (return 2, 1, 0, s)
         s[2] == d && (return 2, 2, 0, s)
         return 2, 3, 0, s
     end
 end
 
-# Auxilliary function to help move across all vertices (implements modulo arithmetic 1)
-# Note that mod(i, 3) returns 0, 1, 2 hence the +1 at the end, but since i is just a normal
-# integer it will always represent the next value
+"""
+    next(i::Integer)
+
+Auxilliary function to help move across all vertices (implements modulo arithmetic 1).
+Note that `mod(i, 3)` returns 0, 1, 2 hence the +1 at the end, but since `i` is just a normal
+integer it will always represent the next value.
+
+# Arguments:
+- `i`: The current vertex index (1, 2, or 3).
+
+# Returns
+The next vertex index in the sequence (1, 2, or 3).
+
+# Example
+```jldoctest
+julia> next(1);
+2
+julia> next(2);
+3
+julia> next(3);
+1
+```
+"""
 next(i::Integer) = mod(i,3) + 1
 
 # Intersect a triangle with a plane, create new triangles, add them to the mesh
+"""
+    one_triangle_intersection!(mesh, t, i, h, vi, slindex, j, s)
+
+Intersect a triangle with a plane, create new triangles, and add them to the mesh.
+
+# Arguments
+- `mesh`: The mesh containing the triangle to be intersected.
+- `t`: The index of the triangle in the mesh.
+- `i`: The index of the axis (1 for X, 2 for Y, 3 for Z).
+- `h`: The height of the plane along the specified axis.
+- `vi`: The index of the vertex that is relevant for the intersection (1, 2, or 3).
+- `slindex`: The slice index for the triangle.
+- `j`: The index of the plane in the specified axis.
+- `s`: The signs of the distances to the plane for each vertex.
+
+# Returns
+A tuple containing the updated slice indices for the two new triangles created from the intersection.
+
+# Example
+```jldoctest
+julia> mesh = Rectangle(length = 1.0, width = 1.0);
+julia> update_edges!(mesh);
+julia> nverts_before = length(vertices(mesh))
+julia> one_triangle_intersection!(mesh, 1, 2, 0.5, 1, [1,1,1], 2, [1, -1, -1]);
+julia> nverts_after = length(vertices(mesh));
+```
+"""
 function one_triangle_intersection!(mesh, t, i, h, vi, slindex, j, s)
     # Extract the relevant vertices and edges
     vs = get_triangle(mesh, t) # Vertices of triangle
@@ -194,6 +272,38 @@ function one_triangle_intersection!(mesh, t, i, h, vi, slindex, j, s)
 end
 
 # Intersect a triangle with a plane, create new triangles, add them to the mesh
+"""
+    two_triangle_intersections!(mesh, t, i, h, vi, slindex, j, s)
+
+Intersect a triangle with a plane, create two new triangles, and add them to the mesh.
+
+# Arguments
+- `mesh`: The mesh containing the triangle to be intersected.
+- `t`: The index of the triangle in the mesh.
+- `i`: The index of the axis (1 for X, 2 for Y, 3 for Z).
+- `h`: The height of the plane along the specified axis.
+- `vi`: The index of the vertex that is relevant for the intersection (1, 2, or 3).
+- `slindex`: The slice index for the triangle.
+- `j`: The index of the plane in the specified axis.
+- `s`: The signs of the distances to the plane for each vertex.
+
+# Returns
+A tuple containing the updated slice indices for the three new triangles created 
+from the intersection.
+
+# Example
+```jldoctest
+julia> mesh = Rectangle(length = 1.0, width = 1.0);
+
+julia> update_edges!(mesh);
+
+julia> nverts_before = length(vertices(mesh))
+
+julia> two_triangle_intersections!(mesh, 1, 2, 0.5, 1, [1,1,1], 2, [1, -1, -1]);
+
+julia> nverts_after = length(vertices(mesh));
+```
+"""
 function two_triangle_intersections!(mesh, t, i, h, vi, slindex, j, s)
     vs = get_triangle(mesh, t) # Vertices of triangle
     es = edges(mesh)[t]     # Edges of triangle
@@ -228,6 +338,33 @@ function two_triangle_intersections!(mesh, t, i, h, vi, slindex, j, s)
 end
 
 # Compute the intersection between the plane and the opposite edge of the vertex
+"""
+    one_intersection_point(i, h, vi, es, vs)
+
+Compute the intersection point between a plane and the edge opposite to the vertex `vi`
+of a triangle defined by its vertices `vs` and edges `es`.
+
+# Arguments
+- `i`: The index of the coordinate axis (1 for X, 2 for Y, 3 for Z).
+- `h`: The height of the plane along the specified axis.
+- `vi`: The index of the vertex that is relevant for the intersection (1, 2, or 3).
+- `es`: The edges of the triangle.
+- `vs`: The vertices of the triangle.
+
+# Returns
+The 3D coordinates of the intersection point.
+
+# Example
+```jldoctest
+julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
+
+julia> es = [vs[2] - vs[1], vs[3] - vs[2], vs[3] - vs[1]]; # Examples: intersect the triangle with the plane x = 0.5, using vertex 1 as the reference
+
+julia> one_intersection_point(1, 0.5, 3, es, vs); # Intersection point between the plane and the edge opposite to vertex 1
+
+julia> one_intersection_point(1, 0.5, 2, es, vs); # Intersection point between the plane and the edge opposite to vertex 2
+```
+"""
 function one_intersection_point(i, h, vi, es, vs)
     @inbounds begin
         # Choose barycentric coordinate system (just one axis)
@@ -241,13 +378,41 @@ function one_intersection_point(i, h, vi, es, vs)
     end
 end
 
+
 # Compute the intersections between the plane and the two edges that share the vertex
+"""
+    two_intersection_points(i, h, vi, es, vs)
+
+Compute the intersection points between a plane and the two edges that share the vertex `vi`
+of a triangle defined by its vertices `vs` and edges `es`.
+
+# Arguments
+- `i`: The index of the coordinate axis (1 for X, 2 for Y, 3 for Z).
+- `h`: The height of the plane along the specified axis.
+- `vi`: The index of the vertex that is relevant for the intersection (1, 2, or 3).
+- `es`: The edges of the triangle.
+- `vs`: The vertices of the triangle.
+
+# Returns
+A tuple containing the 3D coordinates of the two intersection points.
+
+# Example
+```jldoctest
+julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
+
+julia> es = [vs[2] - vs[1], vs[3] - vs[2], vs[1] - vs[3]]; # Examples: intersect the triangle with the plane x = 0.5, using vertex 1 as the reference
+
+julia> two_intersection_points(1, 0.5, 3, es, vs); # Intersection points between the plane and the edges opposite to vertex 1
+
+julia> two_intersection_points(1, 0.5, 2, es, vs); # Intersection points between the plane and the edges opposite to vertex 2
+```
+"""
 function two_intersection_points(i, h, vi, es, vs)
     @inbounds begin
         # Choose barycentric coordinate system
         vi == 1 && begin vr, e1, e2 = (vs[1],   es[1],   es[2]) end
-        vi == 2 && begin vr, e1, e2 = (vs[2], .-es[3], .-es[1]) end
-        vi == 3 && begin vr, e1, e2 = (vs[3],  .-es[2] , es[3]) end
+        vi == 2 && begin vr, e1, e2 = (vs[2], .-es[3], .-es[1]) end 
+        vi == 3 && begin vr, e1, e2 = (vs[3],  .-es[2] , es[3]) end 
         # Calculate the barycentric coordinate on each axis
         # and from that the 3D coordinate of intersection point
         d = (h - vr[i])/e1[i]

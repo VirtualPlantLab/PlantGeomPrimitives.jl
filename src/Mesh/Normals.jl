@@ -1,4 +1,28 @@
 # Calculate the normals of a mesh and add them (deals with partially compute normals)
+"""
+    update_normals!(m::Mesh{FT}) where {FT<:AbstractFloat}
+
+Calculate the normals of a mesh and add them as properties.
+This function checks if the normals property exists, and if not, it creates it.
+It then computes the normals for all vertices in the mesh.
+
+# Arguments
+- `m`: The mesh for which to update the normals.
+
+# Returns
+Nothing. It modifies the mesh in place by adding the normals as a property.
+
+# Example
+```jldoctest
+julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
+
+julia> m = Mesh(vs);
+
+julia> update_normals!(m);
+
+julia> normals(m);
+```
+"""
 function update_normals!(m::Mesh{FT}) where {FT<:AbstractFloat}
     # 1. Check if there is a property called :normals and if not create it
     if !haskey(properties(m), :normals)
