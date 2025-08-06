@@ -2,8 +2,8 @@
 """
     update_edges!(m::Mesh{FT}) where {FT<:AbstractFloat}
 
-Calculate the edges of a mesh and add them as properties. 
-This function checks if the edges property exists, and if not, it creates it. 
+Calculate the edges of a mesh and add them as properties.
+This function checks if the edges property exists, and if not, it creates it.
 It then computes the edges for all vertices in the mesh.
 
 # Arguments
@@ -14,11 +14,13 @@ Nothing. It modifies the mesh in place by adding the edges as a property.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
 
 julia> m = Mesh(vs);
 
-julia> update_edges!(m);
+julia> PG.update_edges!(m);
 
 julia> edges(m);
 ```
@@ -48,7 +50,7 @@ end
 """
     push_edges!(vs, m, i0)
 
-Create the three edges stored as a vector of vectors from 
+Create the three edges stored as a vector of vectors from
 the vertices `vs` starting at index `i0` and add them to the
 mesh's property.
 
@@ -62,13 +64,15 @@ Nothing. It modifies the mesh in place by adding the edges.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
 
 julia> m = Mesh(vs);
 
-julia> update_edges!(m);
+julia> PG.update_edges!(m);
 
-julia> push_edges!(vs, m, 1);
+julia> PG.push_edges!(vs, m, 1);
 
 julia> edges(m);
 ```

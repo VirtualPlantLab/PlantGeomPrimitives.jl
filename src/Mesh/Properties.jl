@@ -15,15 +15,17 @@ The modified `p1` dictionary with properties from `p2` added.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> p1 = Dict{Symbol, AbstractVector}(:prop1 => [1.0, 2.0], :prop2 => [3.0, 4.0]);
 
-julia> p2 = Dict{Symbol, AbstractVector}(:prop1 => [5.0, 6.0], :prop3 => [7.0, 8.0]);
+julia> p2 = Dict{Symbol, AbstractVector}(:prop1 => [5.0, 6.0], :prop2 => [7.0, 8.0]);
 
-julia> merged_properties = add_properties!(p1, p2);
+julia> merged_properties = PG.add_properties!(p1, p2);
 
 julia> merged_properties;
 ```
-""" 
+"""
 function add_properties!(p1::Dict{Symbol, AbstractVector}, p2::Dict{Symbol, AbstractVector})
     # Both are empty
     isempty(p1) && isempty(p2) && (return nothing)

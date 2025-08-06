@@ -10,7 +10,7 @@ In-place affine transfrmation of a mesh `m` using a transformation map `trans`.
 
 # Arguments
 - `m`: The mesh to be transformed.
-- `trans`: The transformation map that defines the affine transformation to be 
+- `trans`: The transformation map that defines the affine transformation to be
 applied to the mesh.
 
 # Returns
@@ -18,13 +18,17 @@ The transformed mesh `m` with updated vertices and normals.
 
 # Example
 ```jldoctest
+julia> import CoordinateTransformations as CT;
+
+julia> import PlantGeomPrimitives as PG;
+
 julia> m = Rectangle();
 
 julia> vec = Vec(1.0, 2.0, 3.0);
 
 julia> trans = CT.LinearMap(CT.SDiagonal(vec...));
 
-julia> transform!(m, trans);
+julia> PG.transform!(m, trans);
 ```
 """
 function transform!(m::Mesh, trans::CT.AbstractAffineMap)

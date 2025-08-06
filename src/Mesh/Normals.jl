@@ -14,11 +14,13 @@ Nothing. It modifies the mesh in place by adding the normals as a property.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
 
 julia> m = Mesh(vs);
 
-julia> update_normals!(m);
+julia> PG.update_normals!(m);
 
 julia> normals(m);
 ```

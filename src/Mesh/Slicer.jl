@@ -16,13 +16,15 @@ the mesh that contains the indices of the planes where each triangle lies.
 
 # Example
 ```jldoctest output=false
-julia> import ColorTypes: RGB
+julia> import ColorTypes: RGB;
 
 julia> mesh = Rectangle(length = 1.0, width = 1.0);
 
 julia> slice!(mesh, Y = collect(-0.25:0.25:0.5), Z = collect(0.25:0.25:1));
 
 julia> add_property!(mesh, :colors, rand(RGB));
+
+julia> using PlantViz;
 
 julia> render(mesh, wireframe = true);
 ```
@@ -126,9 +128,11 @@ A tuple containing:
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> m = Rectangle(length = 1.0, width = 1.0);
 
-julia> check_intersection(m, 1, 2, 0.5, 1);
+julia> PG.check_intersection(m, 1, 2, 0.5, 1);
 ```
 """
 function check_intersection(m::Mesh, t::Integer, i::Integer, h::Real, j::Integer)
@@ -207,12 +211,14 @@ The next vertex index in the sequence (1, 2, or 3).
 
 # Example
 ```jldoctest
-julia> next(1);
-2
-julia> next(2);
-3
-julia> next(3);
-1
+julia> import PlantGeomPrimitives as PG;
+
+julia> PG.next(1);
+
+julia> PG.next(2);
+
+julia> PG.next(3);
+
 ```
 """
 next(i::Integer) = mod(i,3) + 1
@@ -238,10 +244,16 @@ A tuple containing the updated slice indices for the two new triangles created f
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> mesh = Rectangle(length = 1.0, width = 1.0);
-julia> update_edges!(mesh);
-julia> nverts_before = length(vertices(mesh))
-julia> one_triangle_intersection!(mesh, 1, 2, 0.5, 1, [1,1,1], 2, [1, -1, -1]);
+
+julia> PG.update_edges!(mesh);
+
+julia> nverts_before = length(vertices(mesh));
+
+julia> PG.one_triangle_intersection!(mesh, 1, 2, 0.5, 1, [1,1,1], 2, [1, -1, -1]);
+
 julia> nverts_after = length(vertices(mesh));
 ```
 """
@@ -288,20 +300,23 @@ Intersect a triangle with a plane, create two new triangles, and add them to the
 - `s`: The signs of the distances to the plane for each vertex.
 
 # Returns
-A tuple containing the updated slice indices for the three new triangles created 
+A tuple containing the updated slice indices for the three new triangles created
 from the intersection.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> mesh = Rectangle(length = 1.0, width = 1.0);
 
-julia> update_edges!(mesh);
+julia> PG.update_edges!(mesh);
 
-julia> nverts_before = length(vertices(mesh))
+julia> nverts_before = length(vertices(mesh));
 
-julia> two_triangle_intersections!(mesh, 1, 2, 0.5, 1, [1,1,1], 2, [1, -1, -1]);
+julia> PG.two_triangle_intersections!(mesh, 1, 2, 0.5, 1, [1,1,1], 2, [1, -1, -1]);
 
 julia> nverts_after = length(vertices(mesh));
+
 ```
 """
 function two_triangle_intersections!(mesh, t, i, h, vi, slindex, j, s)
@@ -356,13 +371,15 @@ The 3D coordinates of the intersection point.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
 
 julia> es = [vs[2] - vs[1], vs[3] - vs[2], vs[3] - vs[1]]; # Examples: intersect the triangle with the plane x = 0.5, using vertex 1 as the reference
 
-julia> one_intersection_point(1, 0.5, 3, es, vs); # Intersection point between the plane and the edge opposite to vertex 1
+julia> PG.one_intersection_point(1, 0.5, 3, es, vs); # Intersection point between the plane and the edge opposite to vertex 1
 
-julia> one_intersection_point(1, 0.5, 2, es, vs); # Intersection point between the plane and the edge opposite to vertex 2
+julia> PG.one_intersection_point(1, 0.5, 2, es, vs); # Intersection point between the plane and the edge opposite to vertex 2
 ```
 """
 function one_intersection_point(i, h, vi, es, vs)
@@ -398,21 +415,23 @@ A tuple containing the 3D coordinates of the two intersection points.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
 
 julia> es = [vs[2] - vs[1], vs[3] - vs[2], vs[1] - vs[3]]; # Examples: intersect the triangle with the plane x = 0.5, using vertex 1 as the reference
 
-julia> two_intersection_points(1, 0.5, 3, es, vs); # Intersection points between the plane and the edges opposite to vertex 1
+julia> PG.two_intersection_points(1, 0.5, 3, es, vs); # Intersection points between the plane and the edges opposite to vertex 1
 
-julia> two_intersection_points(1, 0.5, 2, es, vs); # Intersection points between the plane and the edges opposite to vertex 2
+julia> PG.two_intersection_points(1, 0.5, 2, es, vs); # Intersection points between the plane and the edges opposite to vertex 2
 ```
 """
 function two_intersection_points(i, h, vi, es, vs)
     @inbounds begin
         # Choose barycentric coordinate system
         vi == 1 && begin vr, e1, e2 = (vs[1],   es[1],   es[2]) end
-        vi == 2 && begin vr, e1, e2 = (vs[2], .-es[3], .-es[1]) end 
-        vi == 3 && begin vr, e1, e2 = (vs[3],  .-es[2] , es[3]) end 
+        vi == 2 && begin vr, e1, e2 = (vs[2], .-es[3], .-es[1]) end
+        vi == 3 && begin vr, e1, e2 = (vs[3],  .-es[2] , es[3]) end
         # Calculate the barycentric coordinate on each axis
         # and from that the 3D coordinate of intersection point
         d = (h - vr[i])/e1[i]

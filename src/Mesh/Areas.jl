@@ -12,13 +12,15 @@ The area of the triangle.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> v1 = Vec(0.0, 0.0, 0.0);
 
 julia> v2 = Vec(1.0, 0.0, 0.0);
 
 julia> v3 = Vec(0.0, 1.0, 0.0);
 
-julia> area_triangle(v1, v2, v3);
+julia> PG.area_triangle(v1, v2, v3);
 ```
 """
 function area_triangle(v1::Vec{FT}, v2::Vec{FT}, v3::Vec{FT})::FT where {FT<:AbstractFloat}

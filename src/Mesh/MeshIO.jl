@@ -15,13 +15,13 @@ A `GeometryBasics.Mesh` object containing the vertices and faces of the mesh.
 
 # Example
 ```jldoctest
+julia> import PlantGeomPrimitives as PG;
+
 julia> vs = [Vec(0.0, 0.0, 0.0), Vec(1.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0)];
 
 julia> m = Mesh(vs);
 
-julia> gl_mesh = GLMesh(m);
-
-julia> typeof(gl_mesh)
+julia> gl_mesh = PG.GLMesh(m);
 ```
 """
 function GLMesh(m::Mesh{FT}) where {FT<:AbstractFloat}
@@ -45,11 +45,13 @@ A `Mesh` object containing the vertices of the mesh.
 
 # Example
 ```jldoctest
+julia> import GeometryBasics as GB;
+
 julia> m = GB.Mesh([GB.Point(0.0, 0.0, 0.0), GB.Point(1.0, 0.0, 0.0), GB.Point(0.0, 1.0, 0.0)], [GB.TriangleFace(1, 2, 3)]);
 
 julia> mesh = Mesh(m);
 
-julia> typeof(mesh)
+julia> typeof(mesh);
 ```
 """
 function Mesh(m::GB.Mesh)
