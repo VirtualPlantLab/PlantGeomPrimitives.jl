@@ -47,54 +47,6 @@ function update_areas!(m::Segments{FT}) where {FT<:AbstractFloat}
     return nothing
 end
 
-################################### VOLUMES ################################################
-
-# TODO: Write documentation for calculate_volumes!()
-function calculate_volumes!(m::Segments{FT}) where {FT<:AbstractFloat}
-    # We need the lengths to compute the volumes
-    if has_lengths(m) && length(lengths(m)) == nsegments(m)
-        lvec = lengths(m)
-    else
-        lvec = calculate_lengths(m)
-    end
-    # We need the radius to compute the volumes (this should always be available!)
-    rvec = radius(m)
-    # Compute the volume of the segment
-    output = Vec{FT}[]
-    for i in 1:nsegments(m)
-        volume = pi*rvec[i]^2*lvec[i]
-        push!(output, volume)
-    end
-    return output
-end
-
-# TODO: Write documentation for update_volumes!()
-function update_volumes!(m::Segments{FT}) where {FT<:AbstractFloat}
-    # 1. Check if there is a property called :volumes and if not create it
-    if !haskey(properties(m), :volumes)
-        properties(m)[:volumes] = Vec{FT}[]
-    end
-    # 2. We need lengths and radius
-    update_lengths!(m)
-    lvec = lengths(m)
-    rvec = radius(m)
-    # 3. If the property :volumes is empty, compute the volumes for all vertices
-    if isempty(volumes(m))
-        for i in 1:nsegments(n)
-            volume = pi*rvec[i]^2*lvec[i]
-            push!(volumes(m), volume)
-        end
-    else
-    # 4. If the property :volumes is not empty, compute the volumes for the remaining vertices
-        ln = length(volumes(m))
-        for i in ln:nsegments(m)
-            volume = pi*rvec[i]^2*lvec[i]
-            push!(volumes(m), volume)
-        end
-    end
-    return nothing
-end
-
 ################################### LENGTHS ################################################
 
 # TODO: Write documentation for calculate_lengths!()

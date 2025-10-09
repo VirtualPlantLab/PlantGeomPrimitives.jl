@@ -1,16 +1,6 @@
 ### This file contains public API ###
 
 """
-    Points{FT}
-
-A struct representing a point cloud using floating-point precision `FT`. Equivalent to
-    `Geom{1,FT}`. See help on `Geom{n,FT}` for details.
-```
-"""
-const Points{FT} = Geom{1,FT}
-
-
-"""
     Points(type = Float64)
 
 Generate an empty point cloud.
@@ -89,7 +79,6 @@ julia> Points(verts);
 """
 Points(vertices::Vector{<:Vec}) = Geom(vertices, Val(1))
 
-
 """
     Points(points)
 
@@ -113,6 +102,58 @@ julia> c = Points([e,r]);
 Points(points::Vector{<:Points}) = Geom(points)
 
 
+
+"""
+    Point(;area = 1.0, normal = Vec(0.0, 0.0, 1.0))
+
+Create a point with properties `area` and `normal`. This primitive
+creates a `Points` object (i.e., geometry object with arity 1, see VPL documentation
+for details). It is not compatible with `Mesh` or `Segments` objects. A point represents a
+location in the real world with an associated area and orientation. Most of the time you
+will not be using this function but specific primitive constructors (analogous those used
+for `Mesh`).
+
+# Arguments
+- `area`: The area associated to the point.
+- `normal`: The normal vector at the point (defines its orientation).
+
+# Examples
+```jldoctest
+julia> Point(;area = 1.0, normal = Vec(0.0, 0.0, 1.0));
+```
+"""
+function Point(;area::FT = 1.0, normal::Vec{FT} = Vec(0.0, 0.0, 1.0)) where {FT}
+    trans = CT.LinearMap(CT.SDiagonal(zero(FT), zero(FT), zero(FT)))
+    Point(trans, area = area, normal = normal)
+end
+
+# Create a Point from affine transformation and associated properties
+function Point(trans::CT.AbstractAffineMap;
+                 area::FT = 1.0, normal::Vec{FT} = Vec(0.0, 0.0, 1.0)) where {FT}
+    # Standard point is located at the origin [0,0,1]
+    p0 = O(FT)
+    # Apply transformation to the point and normal
+    p = Points([trans(p0)])
+    norm_trans = transpose(inv(trans.linear))
+    add_property!(p, :normals, [normalize(norm_trans * normal)])
+    # Add other properties
+    add_property!(p, :areas, [area])
+    return p
+end
+
+# Create a Point from affine transformation and add it in-place to existing Points object
+function Point!(points::Points, trans::CT.AbstractAffineMap;
+                area::FT = 1.0, normal::Vec{FT} = Vec(0.0, 0.0, 1.0)) where {FT}
+    # Standard point is located at the origin [0,0,1]
+    p0 = O(FT)
+    # Apply transformation to the point and normal
+    push!(vertices(points), trans(p0))
+    norm_trans = transpose(inv(trans.linear))
+    add_property!(points, :normals, [normalize(norm_trans * normal)])
+    # Add other properties
+    add_property!(points, :areas, [area])
+    return points
+end
 
 # Types and size
 """
@@ -161,4 +202,4 @@ julia> c = Points(v);
 julia> get_point(c, 6);
 ```
 """
-get_point(points::Points, i) = get_geom(points, i)
+get_point(points::Points, i) = get_geom(vertices(points), i)

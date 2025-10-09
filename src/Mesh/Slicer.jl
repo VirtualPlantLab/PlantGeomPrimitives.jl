@@ -1,22 +1,21 @@
-# TODO Merge triangles within a voxel
-
 """
     slice!(mesh::Mesh; X = (), Y = (), Z = ())
 
-Slice a mesh along specified planes in the X, Y, and Z directions. This function modifies
-the input mesh in place. The resulting mesh will contain a higher number of triangles which
-all constrained to the planes specified. The function will also add a property `:slices` to
-the mesh that contains the indices of the planes where each triangle lies.
+Slice a triangular mesh along specified planes in the X, Y, and Z directions. This function
+will create new triangles as needed by slicing the original triangles. This will update the
+mesh and some of the properties (but not all, so it is advised to slice the mesh before
+adding user-defined properties). The function will add a property `:slices` to the mesh that
+contains the indices of the planes where each triangle lies.
 
 # Arguments
-- `mesh::Mesh`: The mesh to be sliced.
-- `X`: A tuple or array of X-coordinates where the mesh should be sliced.
-- `Y`: A tuple or array of Y-coordinates where the mesh should be sliced.
-- `Z`: A tuple or array of Z-coordinates where the mesh should be sliced.
+- `mesh::Mesh`: The triangular mesh to be sliced.
+- `X`: A tuple or array of X-coordinates where the triangular mesh should be sliced.
+- `Y`: A tuple or array of Y-coordinates where the triangular mesh should be sliced.
+- `Z`: A tuple or array of Z-coordinates where the triangular mesh should be sliced.
 
 # Example
 ```jldoctest
-julia> mesh = Rectangle(length = 1.0, width = 1.0);
+julia> mesh = Rectangle(Mesh; length = 1.0, width = 1.0);
 
 julia> slice!(mesh, Y = collect(-0.25:0.25:0.5), Z = collect(0.25:0.25:1));
 ```

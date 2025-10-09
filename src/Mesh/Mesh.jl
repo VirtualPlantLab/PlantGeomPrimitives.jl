@@ -1,16 +1,6 @@
 ### This file contains public API ###
 
 """
-    Mesh{FT}
-
-A struct representing a 3D mesh using floating-point precision `FT`. Equivalent to `Geom{3,FT}`.
-See help on `Geom{n,FT}` for details.
-```
-"""
-const Mesh{FT} = Geom{3,FT}
-
-
-"""
     Mesh(type = Float64)
 
 Generate an empty triangular dense mesh that represents a primitive or 3D scene.
@@ -162,4 +152,4 @@ julia> m = Mesh(v);
 julia> get_triangle(m, 2);
 ```
 """
-get_triangle(m::Mesh, i) = get_geom(m, i)
+get_triangle(m::Mesh, i) = get_triangle(vertices(m), i)

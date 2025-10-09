@@ -1,8 +1,8 @@
 
 ################################### NORMALS ################################################
 
-# TODO: Write documentation for calculate_normals!()
-function calculate_normals!(m::Mesh{FT}) where {FT<:AbstractFloat}
+# TODO: Write documentation for calculate_normals()
+function calculate_normals(m::Mesh{FT}) where {FT<:AbstractFloat}
     vs = vertices(m)
     lv = length(vs)
     output = Vec{FT}[]
@@ -51,7 +51,7 @@ function area_triangle(v1::Vec{FT}, v2::Vec{FT}, v3::Vec{FT})::FT where {FT<:Abs
 end
 
 # TODO: Write documentation for calculate_areas!()
-function calculate_areas!(m::Mesh{FT}) where {FT<:AbstractFloat}
+function calculate_areas(m::Mesh{FT}) where {FT<:AbstractFloat}
     vs = vertices(m)
     lv = length(vs)
     output = FT[]
@@ -67,7 +67,7 @@ end
 function update_areas!(m::Mesh{FT}) where {FT<:AbstractFloat}
     # 1. Check if there is a property called :areas and if not create it
     if !haskey(properties(m), :areas)
-        properties(m)[:areas] = Vec{FT}[]
+        properties(m)[:areas] = FT[]
     end
     vs = vertices(m)
     lv = length(vs)
@@ -94,10 +94,10 @@ end
 ##################################### EDGES ################################################
 
 # TODO: Write documentation for calculate_edges!()
-function calculate_edges!(m::Mesh{FT}) where {FT<:AbstractFloat}
+function calculate_edges(m::Mesh{FT}) where {FT<:AbstractFloat}
     vs = vertices(m)
     lv = length(vs)
-    output = FT[]
+    output = Vec{FT}[]
     for i in 1:3:lv
         @inbounds v1, v2, v3 = vs[i], vs[i+1], vs[i+2]
         e1 = L.normalize(v2 .- v1)
@@ -112,7 +112,7 @@ end
 function update_edges!(m::Mesh{FT}) where {FT<:AbstractFloat}
     # 1. Check if there is a property called :edges and if not create it
     if !haskey(properties(m), :edges)
-        properties(m)[:edges] = Vec{Vec{FT}}[]
+        properties(m)[:edges] = Vec{FT}[]
     end
     vs = vertices(m)
     lv = length(vs)
@@ -144,7 +144,7 @@ end
 ################################## INCLINATION #############################################
 
 # TODO: Write documentation for calculate_inclinations!()
-function calculate_inclinations!(m::Mesh{FT}) where {FT<:AbstractFloat}
+function calculate_inclinations(m::Mesh{FT}) where {FT<:AbstractFloat}
     # We need the normal vectors to compute the angles
     if has_normals(m) && length(normals(m)) == ntriangles(m)
         nvec = normals(m)
@@ -164,7 +164,7 @@ end
 function update_inclinations!(m::Mesh{FT}) where {FT<:AbstractFloat}
     # 1. Check if there is a property called :inclinations and if not create it
     if !haskey(properties(m), :inclinations)
-        properties(m)[:inclinations] = Vec{Vec{FT}}[]
+        properties(m)[:inclinations] = FT[]
     end
     # 2. We need the normal vectors to compute the angles
     update_normals!(m)
@@ -187,7 +187,7 @@ end
 ################################## ORIENTATION #############################################
 
 # TODO: Write documentation for calculate_orientations!()
-function calculate_orientations!(m::Mesh{FT}) where {FT<:AbstractFloat}
+function calculate_orientations(m::Mesh{FT}) where {FT<:AbstractFloat}
     # We need the normal vectors to compute the angles
     if has_normals(m) && length(normals(m)) == ntriangles(m)
         nvec = normals(m)
@@ -207,7 +207,7 @@ end
 function update_orientations!(m::Mesh{FT}) where {FT<:AbstractFloat}
     # 1. Check if there is a property called :orientations and if not create it
     if !haskey(properties(m), :orientations)
-        properties(m)[:orientations] = Vec{Vec{FT}}[]
+        properties(m)[:orientations] = FT[]
     end
     # 2. We need the normal vectors to compute the angles
     update_normals!(m)

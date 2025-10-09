@@ -1,5 +1,5 @@
 """
-    Geom{3,FT}
+    Geom{n, FT, PT}
 
 A struct representing a geometry composed of vertices and properties. A geometry can have
 three interpretations depending on the value of the parameter `n`:
@@ -19,37 +19,75 @@ Properties may be specified with other levels of precision if the user wishes to
 
 # Fields
 - `vertices`: A vector containing the vertices of the point cloud, segment collection or triangular mesh.
-- `properties`: A dictionary containing additional properties of the geometry (arrays of properties per point, segment or triangle).
+- `properties`: A named tuple containing additional properties of the geometry (arrays of properties per point, segment or triangle).
 
 # Example
 ```jldoctest
 julia> v = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
 
-julia> p = Dict{Symbol, AbstractVector}(:normals => [Vec(0.0, 0.0, 1.0)]);
+julia> p = (;:normals => [Vec(0.0, 0.0, 1.0)]);
 
-julia> m = Geom{3, Float64}(v, p);
+julia> m = Geom{3, Float64, typeof(p)}(v, p);
 ```
 """
-mutable struct Geom{n,FT}
+mutable struct Geom{n,FT, PT}
     vertices::Vector{Vec{FT}}
-    properties::Dict{Symbol, AbstractVector}
+    properties::PT
 end
 
+"""
+    Mesh{FT}
+
+A struct representing a 3D mesh using floating-point precision `FT`. Equivalent to `Geom{3,FT}`.
+See help on `Geom{n,FT}` for details.
+```
+"""
+const Mesh{FT} = Geom{3,FT}
 
 """
-    Geom(arity, type = Float64)
+    Points{FT}
 
-Generate an empty geometry that represents a primitive or 3D scene. By default a `Geom`
-object will store the coordinates in double floating precision  (`Float64`) but a lower
-precision can be specified.
+A struct representing a point cloud using floating-point precision `FT`. Equivalent to
+    `Geom{1,FT}`. See help on `Geom{n,FT}` for details.
+```
+"""
+const Points{FT} = Geom{1,FT}
+
+"""
+    Segments{FT}
+
+A struct representing a collection of segments using floating-point precision `FT`.
+    Equivalent to `Geom{2,FT}`. See help on `Geom{n,FT}` for details.
+```
+"""
+const Segments{FT} = Geom{2,FT}
+
+"""
+    Geom(arity, type = Float64; properties = ())
+
+Generate an empty `Geom` with a list of properties (specified by their element type). By
+default a `Geom` object will store the coordinates in double floating precision
+(`Float64`) but a lower precision can be specified. Certain compulsory properties
+will be added internally.
 
 # Arguments
 - `arity`: The arity of the geometry as a compile-time constant (i.e., `Val(1)`, `Val(2)` or
 `Val(3)`)
+- `properties`: A named tuple specifying the names of the properties and their element type.
 - `type`: The floating-point precision type for the mesh data (default is `Float64`).
 
+# Details
+
+An array with the user-supplied element type will be initialized internally. The following
+properties are created by VPL internally and do not have to be specified by the user:
+
+- For `Mesh` (`Val(3)`) the propery `normals` will be added.
+- For `Segments` (`Val(2)`) the property `radius` will be added.
+- For `Points` (`Val(1)`) the properties `areas` and `normals` will be added.
+
+
 # Returns
-A `Geom` object with no vertices or properties stored in it.
+A `Geom` object initialized but without any actual vertices or properties.
 
 # Example
 ```jldoctest
@@ -57,93 +95,29 @@ julia> m = Geom(Val(3));
 
 julia> nvertices(m);
 
-julia> ntriangles(m);
+julia> length(m);
 
 julia> Geom(Val(3), Float32);
 ```
 """
-macro empty_geom(arity)
-    quote
-        function $(esc(:Geom))(::Val{$arity}, ::Type{FT} = Float64) where {FT<:AbstractFloat}
-            $(esc(:Geom)){$arity, FT}(Vec{FT}[], Dict{Symbol, AbstractVector}())
-        end
-    end
+function Geom(::Val{1}, ::Type{FT} = Float64; properties = NamedTuple()) where {FT<:AbstractFloat}
+    ext_prop = merge(properties, (; areas = FT, normals = Vec{FT}))
+    vec_properties = NamedTuple{keys(ext_prop)}(Tuple{Tuple(Vector{val} for val in values(ext_prop))...}(val[] for val in  values(ext_prop)))
+    Geom{1, FT, typeof(vec_properties)}(Vec{FT}[], vec_properties)
 end
-@empty_geom(1)
-@empty_geom(2)
-@empty_geom(3)
 
-"""
-    Mesh(n, arity, type = Float64)
-
-Generate a geometry object with enough memory allocated to store `n`
-elements. The behaviour is equivalent to generating an empty geometry but may be
-computationally more efficient when appending a large number of elements. If a lower
-floating precision is required, this may be specified
-as an optional third argument as in `Geom(10, Val(3), Float32)`.
-
-# Arguments
-- `n`: The number of elements to allocate memory for.
-- `arity`: The arity of the geometry as a compile-time constant (i.e., `Val(1)`, `Val(2)` or
-`Val(3)`).
-- `type`: The floating-point precision type for the mesh data (default is `Float64`).
-
-# Returns
-A `Geom` object with no vertices.
-
-# Example
-```jldoctest
-julia> m = Geom(1_000, Val(3));
-
-julia> m = Geom(1_000, Val(3), Float32);
-```
-"""
-macro allocate_geom(arity)
-    quote
-        function $(esc(:Geom))(n::Number, ::Val{$arity}, ::Type{FT} = Float64) where {FT<:AbstractFloat}
-            v = Vec{FT}[]
-            sizehint!(v, n)
-            $(esc(:Geom)){$arity,FT}(v, Dict{Symbol, AbstractVector}())
-        end
-    end
+function Geom(::Val{2}, ::Type{FT} = Float64; properties = NamedTuple()) where {FT<:AbstractFloat}
+    ext_prop = merge(properties, (; radius = FT))
+    vec_properties = NamedTuple{keys(ext_prop)}(Tuple{Tuple(Vector{val} for val in values(ext_prop))...}(val[] for val in  values(ext_prop)))
+    Geom{2, FT, typeof(vec_properties)}(Vec{FT}[], vec_properties)
 end
-@allocate_geom(1)
-@allocate_geom(2)
-@allocate_geom(3)
 
-
-"""
-    Geom(vertices, arity)
-
-Generate a geometry obkect from a vector of vertices and arity.
-
-# Arguments
-- `vertices`: List of vertices (each vertex implement as `Vec`).
-- `arity`: The arity of the geometry as a compile-time constant (i.e., `Val(1)`, `Val(2)` or
-`Val(3)`).
-
-# Returns
-A `Geom` object.
-
-# Example
-```jldoctest
-julia> verts = [Vec(0.0, 0.0, 0.0), Vec(0.0, 1.0, 0.0), Vec(1.0, 0.0, 0.0)];
-
-julia> Geom(verts, Val(3));
-```
-"""
-macro vertices_geom(arity)
-    quote
-        function $(esc(:Geom))(vertices::Vector{<:Vec}, ::Val{$arity})
-            @assert !isempty(vertices)
-            FT = eltype(first(vertices))
-            $(esc(:Geom)){$arity,FT}(vertices, Dict{Symbol, AbstractVector}())
-        end
-    end
+function Geom(::Val{3}, ::Type{FT} = Float64; properties = NamedTuple()) where {FT<:AbstractFloat}
+    ext_prop = merge(properties, (; normals = Vec{FT}))
+    vec_properties = NamedTuple{keys(ext_prop)}(Tuple{Tuple(Vector{val} for val in values(ext_prop))...}(val[] for val in  values(ext_prop)))
+    Geom{3, FT, typeof(vec_properties)}(Vec{FT}[], vec_properties)
 end
-@vertices_geom(1)
-@vertices_geom(2)
-@vertices_geom(3)
+
 
 """
     Geom(geoms)
@@ -157,8 +131,7 @@ Merge multiple geometries into a single one
 This function assumes that all geometry objects have the same arity (i.e., they are all
     point clouds, segment collections or triangular meshes), use the same floating point
     precision to store vertices and contain the same type of properties with the same
-    names. When this is not the case, the arity and floating-point precision of the first
-    geometry object will be used.
+    names.
 
 # Returns
 A new `Geom` object that is the result of merging all the input geometry objects.
@@ -173,8 +146,7 @@ julia> m = Geom([e,r]);
 ```
 """
 function Geom(geoms::Vector{<:Geom})
-    @assert !isempty(geoms) "At least one mesh must be provided"
-    @inbounds n = arity(geoms[1])
+    @inbounds ns = arity(geoms[1])
     @inbounds FT = eltype(geoms[1])
     # Initialize vertices and properties (create copy to avoid modifying first geom)
     @inbounds verts = copy(vertices(geoms[1]))
@@ -187,62 +159,15 @@ function Geom(geoms::Vector{<:Geom})
         end
     end
     # Wrap vertices and properties in a geometry object
-    Geom{n, FT}(verts, props)
+    Geom{n, FT, typeof(props)}(verts, props)
 end
-
-
-"""
-    add!(geom1, geom2; kwargs...)
-
-Manually add a geometry to an existing geometry with optional properties captured as keywords.
-
-# Arguments
-- `geom1`: The current geometry we want to extend.
-- `geom2`: A new geometry we want to add.
-- `kwargs`: Properties to be set per triangle in the new mesh.
-
-# Details
-
-Make sure to be consistent with the properties (both geometries should end up with the same
-list of properties). For example, if the scene was created with `:colors``, then you should
-provide `:colors` for the new mesh as well. Note that amny properties already present in
-`geom2` will also be added to `geom1` (e.g., the `:normals` property automatically generated
-for a triangular mesh).
-
-# Example
-```jldoctest
-julia> t1 = Triangle(length = 1.0, width = 1.0);
-
-julia> using ColorTypes: RGB
-
-julia> add_property!(t1, :colors, rand(RGB));
-
-julia> t2 = Rectangle(length = 5.0, width = 0.5);
-
-julia> add!(t1, t2, colors = rand(RGB));
-```
-"""
-function add!(geom1, geom2; kwargs...)
-    # Add the vertices
-    append!(vertices(geom1), vertices(geom2))
-    # Add properties already in geom2
-    for (k, v) in properties(geom2)
-        add_property!(geom1, k, v, length(geom2))
-    end
-    # Set optional properties per triangle
-    for (k, v) in kwargs
-        add_property!(geom1, k, v, length(geom2))
-    end
-    return geom1
-end
-
 
 # Types and size
 
 """
     eltype(geom::Geom)
 
-Extract the the type used to represent coordinates in a geometry object (e.g., `Float64`).
+Extract the type used to represent coordinates in a geometry object (e.g., `Float64`).
 
 # Fields
 - `geom`: The geometry object from which to extract the element type.
@@ -256,8 +181,8 @@ julia> m = Geom(v, Val(3));
 julia> eltype(m);
 ```
 """
-Base.eltype(m::Geom{n, FT}) where {n, FT} = FT
-Base.eltype(::Type{Geom{n, FT}}) where {n, FT} = FT
+Base.eltype(m::Geom{n, FT, PT}) where {n, FT, PT} = FT
+Base.eltype(::Type{Geom{n, FT, PT}}) where {n, FT, PT} = FT
 
 """
     arity(geom::Geom)
@@ -277,7 +202,7 @@ julia> m = Mesh(v);
 julia> arity(m);
 ```
 """
-arity(g::Geom{n,FT}) where {n,FT} = n
+arity(g::Geom{n,FT,PT}) where {n,FT,PT} = n
 
 """
     length(geom)
@@ -334,7 +259,7 @@ nvertices(geom::Geom) = length(vertices(geom))
 Retrieve the vertices of a mesh.
 
 # Arguments
-- `geom`: The geometry obecjt from which to retrieve the vertices.
+- `geom`: The geometry object from which to retrieve the vertices.
 
 # Returns
 A vector containing the vertices of the mesh.
@@ -353,21 +278,20 @@ vertices(geom::Geom) = geom.vertices
 """
     properties(geom::Geom)
 
-Retrieve the properties of a geom object. Properties are stored as a dictionary with one
-entry per type of property. Each property is an array of objects, one per triangle. Each
-property is identified by a symbol.
+Retrieve the properties of a geom object. Properties are stored as a named tuple. Each
+property is an array of objects, one per element within the geom.
 
 # Arguments
-- `geom`: The geometry object from which to retrieve the normals.
+- `geom`: The geometry object from which to retrieve the properties.
 
 # Returns
-A vector containing the normals of the geometry object.
+A named tuple containing the properties of the geometry object.
 
 # Example
 ```jldoctest; output=false
-julia> r = Rectangle();
+julia> r = Rectangle(properties = (; absorbed_PAR = Float64));
 
-julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]);
+julia> add_property!(r, :absorbed_PAR, [0.0, 0.0]); # One value per triangle, match type above
 
 julia> properties(r);
 ```
@@ -375,17 +299,25 @@ julia> properties(r);
 properties(geom::Geom) = geom.properties
 
 """
-    get_geom(geom::Geom, i)
+    get_geom(geom, i)
+    get_point(geom, i)
+    get_segment(geom, i)
+    get_triangle(geom, i)
 
-Retrieve the vertices for the i-th element in the geometry.
+Retrieve the vertices for the i-th element in the geom. Aliases are provided for `Points`,
+    `Segments` and `Mesh`.
 
 # Arguments
-- `geom`: The geometry from which we want to retrieve an element.
+- `geom`: The geometry object from which we want to retrieve an element (one or more vertices).
 - `i`: The index of the element to retrieve.
 
 # Returns
-A vector containing the vertices defining the i-th geometry element (between one and three
-vertices will be returned depending on the arity of the geometry object).
+For segments and triangular meshes it returns a view of the vertices defining the i-th
+geometry element (two or three vertices). In case of points, a single value is returned.
+
+See https://docs.julialang.org/en/v1/base/arrays/#Views-(SubArrays-and-other-view-types) for
+details on views.
+
 
 # Example
 ```jldoctest
@@ -394,49 +326,131 @@ julia> r = Rectangle();
 julia> get_geom(r, 2);
 ```
 """
-function get_geom(geom::Geom, i)
+function get_geom(geom, i)
     n = arity(geom)
     v = vertices(geom)
     if n == 1
-        get_point(v, i)
+        v[i]
     elseif n == 2
-        get_segment(v, i)
+        i1 = (i - 1)*2 + 1
+        @view v[SVector{2,Int}(i1, i1+1)]
     else
-        get_triangle(v, i)
+        i1 = (i - 1)*3 + 1
+        @view v[SVector{3,Int}(i1, i1+1, i1+2)]
     end
 end
 
 
-# Internal function to retrieve the vertices of the i-th segment (give list of vertices)
-function get_point(v::AbstractVector, i)
-    v[i]
+# Aliases to get_geom(geom, i)
+get_point(geom, i) = get_geom(geom, i)
+get_segment(geom, i) = get_geom(geom, i)
+get_triangle(geom, i) = get_geom(geom, i)
+
+
+"""
+    isvalid(geom)
+
+Check that the argument is a valid geometry object.
+
+## Arguments
+- `geom`: The geometry object geom being checked.
+
+## Details
+
+Following checks are performed:
+
+- Arity must be between 1 and 3.
+- The number of vertices must be a multiple of arity.
+- The compulsory properties are present.
+- For each property it is either empty or there is one property per element.
+
+# Returns
+True or false
+
+# Example
+```jldoctest
+julia> r = Rectangle();
+
+julia> isvalid(r);
+```
+"""
+function Base.isvalid(geom::Geom{1, FT, PT}) where {FT, PT}
+    (arity(geom) == 1) &&
+    (:normals in keys(properties(geom))) &&
+    (:areas in keys(properties(geom))) &&
+    all(isempty(p) || (length(p) == length(geom)) for p in properties(geom))
+end
+function Base.isvalid(geom::Geom{2, FT, PT}) where {FT, PT}
+    (arity(geom) == 2) &&
+    (rem(nvertices(geom), 2) == 0) &&
+    (:radius in keys(properties(geom))) &&
+    all(isempty(p) || (length(p) == length(geom)) for p in properties(geom))
+end
+function Base.isvalid(geom::Geom{3, FT, PT}) where {FT, PT}
+    (arity(geom) == 3) &&
+    (rem(nvertices(geom), 3) == 0) &&
+    (:normals in keys(properties(geom))) &&
+    all(isempty(p) || (length(p) == length(geom)) for p in properties(geom))
 end
 
-# Internal function to retrieve the vertices of the i-th segment (give list of vertices)
-function get_segment(v::AbstractVector, i)
-    i1 = (i - 1)*2 + 1
-    @view v[SVector{3,Int}(i1, i1+1)]
-end
 
-# Internal function to retrieve the vertices of the i-th triangle (give list of vertices)
-function get_triangle(v::AbstractVector, i)
-    i1 = (i - 1)*3 + 1
-    @view v[SVector{3,Int}(i1, i1+1, i1+2)]
+"""
+    isempty(geom)
+
+Check that the a geometry has no vertices or properties stored in it.
+
+## Arguments
+- `geom`: The geometry object being checked.
+
+## Details
+
+Following checks are performed:
+
+- Arity must be between 1 and 3.
+- The number of vertices must be a multiple of arity.
+- The compulsory properties are present.
+- For each property it is either empty or there is one property per element.
+
+# Returns
+True or false
+
+# Example
+```jldoctest
+julia> r = Rectangle();
+
+julia> isvalid(r);
+```
+"""
+function Base.isempty(m::Geom)
+    (isempty(vertices(m))) &&
+    all(isempty(p) for p in properties(m))
 end
 
 # Comparisons
 
 # Check if two meshes are equal (mostly for testing)
-# We just test the vertices, not the properties. Both geometries must have the same
-# n-arity and floating point precision
-function Base.:(==)(m1::Geom{n,FT}, m2::Geom{n,FT}) where {n,FT}
-    vertices(m1) == vertices(m2)
+function Base.:(==)(m1::Geom{n,FT,PT}, m2::Geom{n,FT,PT}) where {n,FT,PT}
+    keys(properties(m1)) != keys(properties(m2)) && return false
+    vertices(m1) != vertices(m2) && return false
+    for k in keys(properties(m1))
+        k1 = properties(m1)[k]
+        k2 = properties(m2)[k]
+        length(k1) != length(k2) && return false
+        any(k1 .!= k2) && return false
+    end
+    return true
 end
 
-# Check if two geometries are approximately equal (mostly for testing)
-# We just test the vertices, not the properties. Both geometries must have the same
-# n-arity and floating point precision
-function Base.isapprox(m1::Geom{n,FT}, m2::Geom{n,FT}; atol::Real = 0.0,
-                      rtol::Real = atol > 0.0 ? 0.0 : sqrt(eps(1.0))) where {n, FT}
-    isapprox(vertices(m1), vertices(m2), atol = atol, rtol = rtol)
+# Check if two meshes are approximately equal (mostly for testing)
+function Base.isapprox(m1::Geom{n,FT,PT}, m2::Geom{n,FT,PT}; atol::Real = 0.0,
+                      rtol::Real = atol > 0.0 ? 0.0 : sqrt(eps(1.0)))  where {n,FT,PT}
+    keys(properties(m1)) != keys(properties(m2)) && return false
+    !isapprox(vertices(m1), vertices(m2), atol = atol, rtol = rtol) && return false
+    for k in keys(properties(m1))
+        k1 = properties(m1)[k]
+        k2 = properties(m2)[k]
+        length(k1) != length(k2) && return false
+        !isapprox(k1, k2, atol = atol, rtol = rtol) && return false
+    end
+    return true
 end

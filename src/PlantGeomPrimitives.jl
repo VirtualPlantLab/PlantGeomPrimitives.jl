@@ -7,29 +7,45 @@ import FileIO, MeshIO
 import LinearAlgebra as L
 import CoordinateTransformations as CT
 import Rotations
+import Elliptic
+import Sobol: SobolSeq, next!
+import ArgCheck: @argcheck
 
+# Helpers to create points and vectors
+export Vec, O, X, Y, Z
+
+# Basic geometry
 export Geom, Points, Segments, Mesh,
        arity, nvertices, ntriangles, nsegments, npoints,
-       properties, add_property!, add!, delete_property!,
+       properties, get_geom, get_geom, get_triangle, get_segment, get_point, vertices,
        areas, has_areas, calculate_areas, update_areas!,
-       volumes, has_volumes, calculate_volumes, update_volumes!,
        inclinations, has_inclinations, calculate_inclinations, update_inclinations!,
        orientations, has_orientations, calculate_orientations, update_orientations!,
        lengths, has_lengths, calculate_lengths, update_lengths!,
        edges, has_edges, calculate_edges, update_edges!,
        normals, has_normals, calculate_normals, update_normals!,
+       radius, has_radius,
        slices, has_slices,
-       Vec, O, X, Y, Z,
-       scale!, rotatex!, rotatey!, rotatez!, rotate!, translate!,
-       Triangle, Rectangle, Trapezoid, SolidCube, HollowCube, BBox, Ellipse, HollowCylinder,
-       SolidCylinder, HollowCone, SolidCone, HollowFrustum, SolidFrustum, Ellipsoid, Triangle!,
-       Rectangle!, Trapezoid!, SolidCube!, Ellipse!, HollowCube!, HollowCylinder!, SolidCylinder!,
-       HollowCone!, SolidCone!, HollowFrustum!, SolidFrustum!,
-       get_geom, get_triangle, get_segment, get_point, vertices,
-       slice!,
-       load_mesh, save_mesh
+       scale!, rotatex!, rotatey!, rotatez!, rotate!, translate!, transform!,
+       Triangle, Triangle!,
+       Rectangle, Rectangle!,
+       Trapezoid, Trapezoid!,
+       SolidCube, SolidCube!,
+       HollowCube, HollowCube!,
+       BBox,
+       Ellipse, Ellipse!,
+       HollowCylinder, HollowCylinder!,
+       SolidCylinder, SolidCylinder!,
+       HollowCone, HollowCone!,
+       SolidCone, SolidCone!,
+       HollowFrustum, HollowFrustum!,
+       SolidFrustum, SolidFrustum!,
+       Ellipsoid
 
-abstract type Material end
+# export
+#
+#        slice!,
+#        load_mesh, save_mesh
 
 """
     Vec(x, y, z)
@@ -159,32 +175,63 @@ end
 # Geometry
 include("General/Geom.jl")
 include("General/Properties.jl")
-include("General/Normals.jl")
 include("General/Transformations.jl")
 
-# Mesh
+# # Mesh
 include("Mesh/Mesh.jl")
-include("Mesh/Edges.jl")
-include("Mesh/Areas.jl")
-include("Mesh/Slicer.jl")
-include("Mesh/MeshIO.jl")
+# include("Mesh/Slicer.jl")
+# include("Mesh/MeshIO.jl")
+include("Mesh/Properties.jl")
 
+# # Points
+include("Points/Points.jl")
+# include("Points/Slicer.jl")
+# include("Points/Properties.jl")
 
-# Primitive constructors (for triangular meshes)
-include("Primitives/BBox.jl")
-include("Primitives/Generic.jl")
-include("Primitives/Triangle.jl")
-include("Primitives/Rectangle.jl")
-include("Primitives/Trapezoid.jl")
-include("Primitives/Ellipse.jl")
-include("Primitives/SolidCube.jl")
-include("Primitives/HollowCube.jl")
-include("Primitives/HollowCylinder.jl")
-include("Primitives/SolidCylinder.jl")
-include("Primitives/HollowCone.jl")
-include("Primitives/SolidCone.jl")
-include("Primitives/HollowFrustum.jl")
-include("Primitives/SolidFrustum.jl")
-include("Primitives/Ellipsoid.jl")
+# # Segments
+include("Segments/Segments.jl")
+# include("Segments/Slicer.jl")
+# include("Segments/Properties.jl")
+
+# # Primitive constructors (general, dispatch different geom methods)
+include("General/Primitives/Cone.jl")
+include("General/Primitives/Cube.jl")
+include("General/Primitives/Cylinder.jl")
+include("General/Primitives/Flat.jl")
+include("General/Primitives/Frustum.jl")
+
+# # Primitive constructors (for triangular meshes)
+include("Mesh/Primitives/BBox.jl")
+include("Mesh/Primitives/Generic.jl")
+include("Mesh/Primitives/Triangle.jl")
+include("Mesh/Primitives/Rectangle.jl")
+include("Mesh/Primitives/Trapezoid.jl")
+include("Mesh/Primitives/Ellipse.jl")
+include("Mesh/Primitives/SolidCube.jl")
+include("Mesh/Primitives/HollowCube.jl")
+include("Mesh/Primitives/HollowCylinder.jl")
+include("Mesh/Primitives/SolidCylinder.jl")
+include("Mesh/Primitives/HollowCone.jl")
+include("Mesh/Primitives/SolidCone.jl")
+include("Mesh/Primitives/HollowFrustum.jl")
+include("Mesh/Primitives/SolidFrustum.jl")
+include("Mesh/Primitives/Ellipsoid.jl")
+
+# # Primitive constructors (for point clouds)
+# include("Points/Primitives/PointSampler.jl")
+# include("Points/Primitives/Generic.jl")
+# include("Points/Primitives/Triangle.jl")
+# include("Points/Primitives/Rectangle.jl")
+# include("Points/Primitives/Trapezoid.jl")
+# include("Points/Primitives/Ellipse.jl")
+# include("Points/Primitives/SolidCube.jl")
+# include("Points/Primitives/HollowCube.jl")
+# include("Points/Primitives/HollowCylinder.jl")
+# include("Points/Primitives/SolidCylinder.jl")
+# include("Points/Primitives/HollowCone.jl")
+# include("Points/Primitives/SolidCone.jl")
+# include("Points/Primitives/HollowFrustum.jl")
+# include("Points/Primitives/SolidFrustum.jl")
+# include("Points/Primitives/Ellipsoid.jl")
 
 end

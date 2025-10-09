@@ -1,0 +1,62 @@
+### This file contains public API ###
+
+#########################################################
+##################### Iterators #########################
+#########################################################
+
+all_trapezoid_vertices(ratio::FT) where {FT} =
+    (Vec{FT}(0, ratio, 1), Vec{FT}(0, -ratio, 1), Vec{FT}(0, -1, 0), Vec{FT}(0, 1, 0))
+struct TrapezoidMeshVertices{TT, VT}
+    trans::TT
+    verts::VT
+end
+function genTrapezoidMeshVertices(trans, ratio)
+    FT = eltype(trans.linear)
+    TrapezoidMeshVertices(trans, all_trapezoid_vertices(ratio))
+end
+function Base.iterate(t::TV, i::Int = 1)::Union{Nothing,Tuple{eltype(TV),Int64}} where {TV<:TrapezoidMeshVertices}
+     i < 4 && return (@inbounds t.trans(t.verts[i]), i + 1)
+     i == 4 && return (@inbounds t.trans(t.verts[1]), i + 1)
+     i == 5 && return (@inbounds t.trans(t.verts[3]), i + 1)
+     i == 6 && return (@inbounds t.trans(t.verts[4]), i + 1)
+     i == 7 && return nothing
+end
+Base.length(r::TrapezoidMeshVertices) = 6
+function Base.eltype(::Type{TrapezoidMeshVertices{TT,VT}}) where {TT,VT}
+    @inbounds VT.types[1]
+end
+
+#########################################################
+#################### Constructors #######################
+#########################################################
+
+"""
+    TrapezoidMesh(;length = 1.0, width = 1.0, ratio = 1.0)
+
+Create a trapezoid with dimensions given by `length` and the larger `width` and
+the `ratio` between the smaller and larger widths. The trapezoid is generted at
+the standard location and orientation.
+
+# Arguments
+- `length = 1.0`: The length of the trapezoid.
+- `width = 1.0`: The larger width of the trapezoid (the lower base of the trapezoid).
+- `ratio = 1.0`: The ratio between the smaller and larger widths.
+
+# Examples
+```jldoctest
+julia> TrapezoidMesh(;length = 1.0, width = 1.0, ratio = 1.0);
+```
+"""
+function TrapezoidMesh(; length::FT = 1.0, width::FT = 1.0, ratio::FT = 1.0) where {FT}
+    trans = CT.LinearMap(CT.SDiagonal(one(FT), width / FT(2), length))
+    TrapezoidMesh(trans, ratio)
+end
+
+# Create a trapezoid from affine transformation
+TrapezoidMesh(trans::CT.AbstractAffineMap, ratio) =
+    PrimitiveMesh(trans, x -> genTrapezoidMeshVertices(x, ratio))
+
+# Create a trapezoid from affine transformation and add it in-place to existing mesh
+function Trapezoid!(m::Mesh, trans::CT.AbstractAffineMap, ratio)
+    Primitive!(m, trans, x -> genTrapezoidMeshVertices(x, ratio))
+end

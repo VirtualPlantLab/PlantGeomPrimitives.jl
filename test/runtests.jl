@@ -18,10 +18,35 @@ doctest(PlantGeomPrimitives)
     Aqua.test_ambiguities([PlantGeomPrimitives])
 end
 
+# Basic geom creation
+@testset "geom" begin
+    include("general/test_geom.jl")
+end
+
+# Different cases where properties are added
+@testset "properties" begin
+    include("properties/test_properties.jl")
+end
+
+@testset "transformations" begin
+    include("general/test_transformations.jl")
+end
+
 # Direct meshing
 @testset "ellipse" begin
-    include("test_ellipse.jl")
+    include("primitives/test_ellipse.jl")
 end
+
+
+
+
+
+
+
+
+
+
+
 @testset "bbox" begin
     include("test_bbox.jl")
 end
@@ -58,9 +83,7 @@ end
 @testset "solid_cone" begin
     include("test_solid_cone.jl")
 end
-@testset "transformations" begin
-    include("test_transformations.jl")
-end
+
 
 # Make sure normals are correct
 @testset "normals" begin
@@ -80,9 +103,4 @@ end
 # Mesh I/O
 @testset "mesh_io" begin
     include("test_meshio.jl")
-end
-
-# Different cases where properties are added
-@testset "properties" begin
-    include("test_properties.jl")
 end
