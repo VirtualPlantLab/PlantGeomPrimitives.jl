@@ -23,10 +23,6 @@ julia> mesh = Rectangle(length = 1.0, width = 1.0);
 julia> slice!(mesh, Y = collect(-0.25:0.25:0.5), Z = collect(0.25:0.25:1));
 
 julia> add_property!(mesh, :colors, rand(RGB));
-
-julia> using PlantViz;
-
-julia> render(mesh, wireframe = true);
 ```
 """
 function slice!(mesh::Mesh; X = (), Y = (), Z = ())
