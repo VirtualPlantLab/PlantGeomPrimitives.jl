@@ -70,19 +70,19 @@ Rotate a mesh `m` around the x axis by angle `θ`.
 
 # Arguments
 - `m`: The mesh to be scaled.
-- `θ`: Angle of rotation in radians.
+- `θ`: Angle of rotation in degrees.
 
 # Examples
 ```jldoctest
 julia> m = Rectangle();
 
-julia> θ = pi/2;
+julia> θ = 90.0;
 
 julia> rotatex!(m, θ)
 ```
 """
 function rotatex!(m::Mesh, θ)
-    trans = CT.LinearMap(Rotations.RotX(θ))
+    trans = CT.LinearMap(Rotations.RotX(θ*pi/180))
     transform!(m, trans)
 end
 
@@ -93,19 +93,19 @@ Rotate a mesh `m` around the y axis by angle `θ`.
 
 # Arguments
 - `m`: The mesh to be scaled.
-- `θ`: Angle of rotation in radians.
+- `θ`: Angle of rotation in degrees.
 
 # Examples
 ```jldoctest
 julia> m = Rectangle();
 
-julia> θ = pi/2;
+julia> θ = 90.0;
 
 julia> rotatey!(m, θ);
 ```
 """
 function rotatey!(m::Mesh, θ)
-    trans = CT.LinearMap(Rotations.RotY(θ))
+    trans = CT.LinearMap(Rotations.RotY(θ*pi/180))
     transform!(m, trans)
 end
 
@@ -116,19 +116,19 @@ Rotate a mesh `m` around the z axis by angle `θ`.
 
 # Arguments
 - `m`: The mesh to be scaled.
-- `θ`: Angle of rotation in radians.
+- `θ`: Angle of rotation in degrees.
 
 # Examples
 ```jldoctest
 julia> m = Rectangle();
 
-julia> θ = pi/2;
+julia> θ = 90.0;
 
 julia> rotatez!(m, θ);
 ```
 """
 function rotatez!(m::Mesh, θ)
-    trans = CT.LinearMap(Rotations.RotZ(θ))
+    trans = CT.LinearMap(Rotations.RotZ(θ*pi/180))
     transform!(m, trans)
 end
 
