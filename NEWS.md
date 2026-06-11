@@ -2,6 +2,14 @@
 
 We started keeping track of changes in the `NEWS.md` file after version 0.1.0.
 
+# PlantGeomPrimitives 1.0.1 (2026-06-11)
+
+The rotation functions were still expecting angles in radians rather than degrees. The
+documentation and internal implementation have been updated and tests improve (this error
+went undetected!). This affects code where manual rotation of geometry was being used.
+
+Functions affected: `rotatex!`, `rotatey!`, `rotatez!`.
+
 # PlantGeomPrimitives 1.0.0 (2026-06-10)
 
 No actual changes. We move to version 1.0.0 because:
