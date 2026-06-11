@@ -82,7 +82,7 @@ julia> rotatex!(m, θ)
 ```
 """
 function rotatex!(m::Mesh, θ)
-    trans = CT.LinearMap(Rotations.RotX(θ*pi/180))
+    trans = CT.LinearMap(Rotations.RotX(deg2rad(θ)))
     transform!(m, trans)
 end
 
@@ -105,7 +105,7 @@ julia> rotatey!(m, θ);
 ```
 """
 function rotatey!(m::Mesh, θ)
-    trans = CT.LinearMap(Rotations.RotY(θ*pi/180))
+    trans = CT.LinearMap(Rotations.RotY(deg2rad(θ)))
     transform!(m, trans)
 end
 
@@ -128,7 +128,7 @@ julia> rotatez!(m, θ);
 ```
 """
 function rotatez!(m::Mesh, θ)
-    trans = CT.LinearMap(Rotations.RotZ(θ*pi/180))
+    trans = CT.LinearMap(Rotations.RotZ(deg2rad(θ)))
     transform!(m, trans)
 end
 
