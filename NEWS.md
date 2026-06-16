@@ -2,6 +2,12 @@
 
 We started keeping track of changes in the `NEWS.md` file after version 0.1.0.
 
+# PlantGeomPrimitives 1.0.1 (2026-06-16)
+
+Implement `Ellipsoid` as a primitive discretize into rectangular patches defined by fixed longitude and 
+latitude increments. The user specifies the number of longitude and latitude increments rather than the
+total number of triangles.
+
 # PlantGeomPrimitives 1.0.1 (2026-06-11)
 
 The rotation functions were still expecting angles in radians rather than degrees. The
