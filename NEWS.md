@@ -2,7 +2,11 @@
 
 We started keeping track of changes in the `NEWS.md` file after version 0.1.0.
 
-# PlantGeomPrimitives 1.0.1 (2026-06-16)
+# PlantGeomPrimitives 1.0.3 (2026-06-16)
+
+Now `Ellipsoid!` is exported like other primitives.
+
+# PlantGeomPrimitives 1.0.2 (2026-06-16)
 
 Implement `Ellipsoid` as a primitive discretize into rectangular patches defined by fixed longitude and 
 latitude increments. The user specifies the number of longitude and latitude increments rather than the
